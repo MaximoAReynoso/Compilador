@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef TOKENS
 #define PLUS 257
@@ -56,13 +57,24 @@
 int yylex(FILE *file){
     if (file == NULL){
         perror("Error archivo inexistente");
-        return -1;
+        return 1;
     }
 
     int c;
+    int previous;
+    char* string;
     while ((c = fgetc(file)) != EOF){
         if (!isspace(c)){
+            int len = strlen(string);
+            string[len] = c;
+            string[len+1] = '/0';
 
+            if (c == '/' && previous == '/'){
+                while ((c = fgetc(file)) != '/n' && c != EOF){}
+                break;
+            }
+
+            previous == c;
         }
     }
     
