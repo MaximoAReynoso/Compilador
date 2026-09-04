@@ -40,18 +40,17 @@
 #define PES_I 287
 #define SINGLEF 288
 #define MULT_STRING 289
-#define COMMENT 290
 
-#define FROM 291
-#define TO 292
-#define BY 293
-#define REPEAT 294
+#define FROM 290
+#define TO 291
+#define BY 292
+#define REPEAT 293
 
-#define LBRACKET 295
-#define RBRACKET 296
+#define LBRACKET 294
+#define RBRACKET 295
 
-#define COMPTIME 297
-#define TOSF 298
+#define COMPTIME 296
+#define TOSF 297
 #endif
 
 int yylex(FILE *file){
@@ -62,7 +61,9 @@ int yylex(FILE *file){
 
     int c;
     while ((c = fgetc(file)) != EOF){
-        
+        if (!isspace(c)){
+
+        }
     }
     
     return 0;
