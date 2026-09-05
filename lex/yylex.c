@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <regex.h>
+#include <stdbool.h>
 
 #ifndef TOKENS
 #define PLUS 257
@@ -54,7 +55,19 @@
 #define TOSF 297
 #endif
 
-int yylex(FILE *file){
+bool compareRegex(const char* string, const char* patron){
+    regex_t regex;
+    int res;
+
+    if (regcomp(&regex, patron, REG_EXTENDED || REG_ICASE) != 0)
+        return false;
+    res = regexec(&regex, string, 0, NULL, 0);
+    regfree(&regex);
+
+    return res == 0;
+}
+
+int yylex(FILE *file, int estados, int inputs, int matriz[estados][inputs]){
     if (file == NULL){
         perror("Error archivo inexistente");
         return 1;
@@ -62,20 +75,104 @@ int yylex(FILE *file){
 
     int c;
     int previous;
-    char* string;
-    while ((c = fgetc(file)) != EOF){
-        if (!isspace(c)){
-            int len = strlen(string);
-            string[len] = c;
-            string[len+1] = '/0';
+    char string[50] = "";
+    int estado = 0;
 
-            if (c == '/' && previous == '/'){
-                while ((c = fgetc(file)) != '/n' && c != EOF){}
-                break;
-            }
+    //ver que hacer con el .* al final
+    while ((c = fgetc(file)) != EOF && estado != 14){
+        estado = matriz[estado][c];
+        strcat(string, c);
 
-            previous == c;
+        if (estado == 14){
+            if (compareRegex(string, "^+$")) return PLUS;
+            if (compareRegex(string, "^-$")) return MINUS;
+            if (compareRegex(string, "^*$")) return MULT;
+            if (compareRegex(string, "^/.*$")) return DIV;
+
+            if (compareRegex(string, "^<=$")) return GE;
+            if (compareRegex(string, "^>=$")) return LE;
+            if (compareRegex(string, "^<.*$")) return GT;
+            if (compareRegex(string, "^>.*$")) return LT;
+            if (compareRegex(string, "^==$")) return EQ;
+            if (compareRegex(string, "^!=$")) return NE;
+
+            if (compareRegex(string, "^:=$")) return ASSIGN_COLON;
+            if (compareRegex(string, "^=.*$")) return ASSIGN;
+
+            if (compareRegex(string, "^($")) return LPAREN;
+            if (compareRegex(string, "^)$")) return RPAREN;
+
+            if (compareRegex(string, "^[$")) return LBRACKET;
+            if (compareRegex(string, "^]$")) return RBRACKET;
+
+            if (compareRegex(string, "^if.*$")) return IF;
+            if (compareRegex(string, "^else.*$")) return ELSE;
+            if (compareRegex(string, "^end_if.*$")) return END_IF;
+            if (compareRegex(string, "^begin.*$")) return BEGIN;
+            if (compareRegex(string, "^end.*$")) return END;
+            if (compareRegex(string, "^pout.*$")) return POUT;
+            if (compareRegex(string, "^ret.*$")) return RET;
+            if (compareRegex(string, "^class.*$")) return CLASS;
+            if (compareRegex(string, "^funct.*$")) return FUNCT;
+            if (compareRegex(string, "^from.*$")) return FROM;
+            if (compareRegex(string, "^to.*$")) return TO;
+            if (compareRegex(string, "^by.*$")) return BY;
+            if (compareRegex(string, "^repeat.*$")) return REPEAT;
+            if (compareRegex(string, "^comptime.*$")) return COMPTIME;
+            if (compareRegex(string, "^tosf.*$")) return COMPTIME;
+            if (compareRegex(string, "^[0-9]*$")) return CTE;
+            if (compareRegex(string, "^[a-z0-9_]*$")) return ID;
+
+            if (compareRegex(string, "^\".*\"$")) return MULT_STRING;
+        } 
+        
+        if (estado == -1){
+            //esto es un error, ver si el valor retornado esta bien
+            return 0;
         }
+    }
+
+    if (estado == 14){
+        if (compareRegex(string, "^+$")) return PLUS;
+        if (compareRegex(string, "^-$")) return MINUS;
+        if (compareRegex(string, "^*$")) return MULT;
+        if (compareRegex(string, "^/.*$")) return DIV;
+
+        if (compareRegex(string, "^<=$")) return GE;
+        if (compareRegex(string, "^>=$")) return LE;
+        if (compareRegex(string, "^<.*$")) return GT;
+        if (compareRegex(string, "^>.*$")) return LT;
+        if (compareRegex(string, "^==$")) return EQ;
+        if (compareRegex(string, "^!=$")) return NE;
+
+        if (compareRegex(string, "^:=$")) return ASSIGN_COLON;
+        if (compareRegex(string, "^=.*$")) return ASSIGN;
+
+        if (compareRegex(string, "^($")) return LPAREN;
+        if (compareRegex(string, "^)$")) return RPAREN;
+
+        if (compareRegex(string, "^[$")) return LBRACKET;
+        if (compareRegex(string, "^]$")) return RBRACKET;
+
+        if (compareRegex(string, "^if.*$")) return IF;
+        if (compareRegex(string, "^else.*$")) return ELSE;
+        if (compareRegex(string, "^end_if.*$")) return END_IF;
+        if (compareRegex(string, "^begin.*$")) return BEGIN;
+        if (compareRegex(string, "^end.*$")) return END;
+        if (compareRegex(string, "^pout.*$")) return POUT;
+        if (compareRegex(string, "^ret.*$")) return RET;
+        if (compareRegex(string, "^class.*$")) return CLASS;
+        if (compareRegex(string, "^funct.*$")) return FUNCT;
+        if (compareRegex(string, "^from.*$")) return FROM;
+        if (compareRegex(string, "^to.*$")) return TO;
+        if (compareRegex(string, "^by.*$")) return BY;
+        if (compareRegex(string, "^repeat.*$")) return REPEAT;
+        if (compareRegex(string, "^comptime.*$")) return COMPTIME;
+        if (compareRegex(string, "^tosf.*$")) return COMPTIME;
+        if (compareRegex(string, "^[0-9]*$")) return CTE;
+        if (compareRegex(string, "^[a-z0-9_]*$")) return ID;
+
+        if (compareRegex(string, "^\".*\"$")) return MULT_STRING;
     }
     
     return 0;

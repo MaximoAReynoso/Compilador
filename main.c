@@ -7,7 +7,6 @@ void initialize(int estados, int inputs, int matriz[estados][inputs]){
         for(int j = 0; j < inputs; j++)
             matriz[i][j] = -1;
 }
-
 void fill(int estados, int inputs, int matriz[estados][inputs]){
     matriz[0][32] = 0;      // " "
     matriz[0][9] = 0;       // tab
@@ -104,11 +103,13 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    int matriz_transicion[14][128];
-    initialize(14, 127, matriz_transicion);
-    fill(14, 127, matriz_transicion);
+    int matriz_transicion_de_estados[14][128];
+    initialize(14, 127, matriz_transicion_de_estados);
+    fill(14, 127, matriz_transicion_de_estados);
 
-
+    int matriz_acciones_semanticas[14][128];
+    initialize(14, 127, matriz_acciones_semanticas);
+    //fill_semantica(...)
 
     //yyparse();
 
