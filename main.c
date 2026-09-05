@@ -105,8 +105,8 @@ int main(int argc, char* argv[]){
     }
 
     int matriz_transicion[14][128];
-    initialize(14, 128, matriz_transicion);
-    fill(14, 128, matriz_transicion);
+    initialize(14, 127, matriz_transicion);
+    fill(14, 127, matriz_transicion);
 
 
 
