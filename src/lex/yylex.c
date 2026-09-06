@@ -261,31 +261,41 @@ int yylex(){
     //ver que hacer con el .* al final
     while ((c = fgetc(archivo_fuente)) != EOF){
         estado = matriz_transicion[estado][c];
-        strcat(string, c);          //error c es un entero
+        strcat(string, c);          //error, c es un entero
                                     //mantener string con nulo al final
 
         if (estado == 14){
-            if (compareRegex(string, "^+$")) return PLUS;
+
+            // de todo esto hay alguna accion semantica que se encarga, (esto se borraria)
+
+            if (compareRegex(string, "^+$")) return PLUS;  //accion semantica as_emit_token
             if (compareRegex(string, "^-$")) return MINUS;
             if (compareRegex(string, "^*$")) return MULT;
             if (compareRegex(string, "^/.*$")) return DIV;
-
-            if (compareRegex(string, "^<=$")) return GE;
-            if (compareRegex(string, "^>=$")) return LE;
-            if (compareRegex(string, "^<.*$")) return GT;
-            if (compareRegex(string, "^>.*$")) return LT;
-            if (compareRegex(string, "^==$")) return EQ;
-            if (compareRegex(string, "^!=$")) return NE;
-
-            if (compareRegex(string, "^:=$")) return ASSIGN_COLON;
-            if (compareRegex(string, "^=.*$")) return ASSIGN;
-
             if (compareRegex(string, "^($")) return LPAREN;
             if (compareRegex(string, "^)$")) return RPAREN;
-
             if (compareRegex(string, "^[$")) return LBRACKET;
             if (compareRegex(string, "^]$")) return RBRACKET;
 
+            if (compareRegex(string, "^<=$")) return GE;  //accion semantica as_emit_token_comp
+            if (compareRegex(string, "^>=$")) return LE;
+            if (compareRegex(string, "^==$")) return EQ;
+            
+            if (compareRegex(string, "^!=$")) return NE;  //accion semantica as_emit_token_NEQ
+
+            if (compareRegex(string, "^:=$")) return ASSIGN_COLON; //accion semantica as_emit_token_ASIG
+
+            if (compareRegex(string, "^<.*$")) return GT; //accion semantica as_retract_and_emit
+            if (compareRegex(string, "^>.*$")) return LT;
+            if (compareRegex(string, "^=.*$")) return ASSIGN;
+        
+            if (compareRegex(string, "^[0-9]*$")) return CTE; //accion semantica as_emit_token_INT
+
+            if (compareRegex(string, "^\".*\"$")) return MULT_STRING; //accion semantica as_emit_token_string
+
+            
+            // Puede implementarse esto dentro de la accion semantica as_PR_IDENT() en acciones_semanticas.c 
+            // para determinar si el lexema es una palabra reservada o un identificador
             if (compareRegex(string, "^if.*$")) return IF;
             if (compareRegex(string, "^else.*$")) return ELSE;
             if (compareRegex(string, "^end_if.*$")) return END_IF;
@@ -301,10 +311,8 @@ int yylex(){
             if (compareRegex(string, "^repeat.*$")) return REPEAT;
             if (compareRegex(string, "^comptime.*$")) return COMPTIME;
             if (compareRegex(string, "^tosf.*$")) return COMPTIME;
-            if (compareRegex(string, "^[0-9]*$")) return CTE;
             if (compareRegex(string, "^[a-z0-9_]*$")) return ID;
 
-            if (compareRegex(string, "^\".*\"$")) return MULT_STRING;
         } 
         
         if (estado == -1){
