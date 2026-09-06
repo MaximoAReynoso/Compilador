@@ -64,7 +64,7 @@ bool compareRegex(const char* string, const char* patron){
     res = regexec(&regex, string, 0, NULL, 0);
     regfree(&regex);
 
-    return res == 0;
+    return res == 0; 
 }
 
 int yylex(FILE *file, int estados, int inputs, int matriz[estados][inputs]){
@@ -81,7 +81,8 @@ int yylex(FILE *file, int estados, int inputs, int matriz[estados][inputs]){
     //ver que hacer con el .* al final
     while ((c = fgetc(file)) != EOF && estado != 14){
         estado = matriz[estado][c];
-        strcat(string, c);
+        strcat(string, c);          //error c es un entero
+                                    //mantener string con nulo al final
 
         if (estado == 14){
             if (compareRegex(string, "^+$")) return PLUS;

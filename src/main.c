@@ -12,7 +12,7 @@ void fill(int estados, int inputs, int matriz[estados][inputs]){
     matriz[0][9] = 0;       // tab
 
     matriz[0][10] = 0;      // \n
-    matriz[9][10] = 0;
+    matriz[9][10] = 0;      // fin comentario
 
     //Digitos 0-9
     for (int i = 48; i <= 57; i++){
@@ -34,7 +34,7 @@ void fill(int estados, int inputs, int matriz[estados][inputs]){
     matriz[1][46] = 4;
 
     matriz[0][33] = 10;      //!
-    matriz[0][58] = 13;      //:
+    matriz[0][58] = 12;      //:
 
     matriz[0][61] = 11;      //=
     matriz[10][61] = 14;
@@ -52,7 +52,7 @@ void fill(int estados, int inputs, int matriz[estados][inputs]){
     matriz[6][45] = 7;        //-
     matriz[0][42] = 14;       //*
 
-    matriz[0][47] = 8;        // /
+    matriz[0][47] = 8;        ///
     matriz[8][47] = 9;
 
     matriz[2][105] = 14;      //i
