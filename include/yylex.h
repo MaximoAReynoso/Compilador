@@ -6,6 +6,7 @@
 extern int numero_linea;
 extern char buffer_lexema[1024];
 extern int longitud_lexema;
+extern FILE *archivo_fuente;
 
 void init_lexer();
 
