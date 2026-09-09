@@ -1,6 +1,8 @@
 #include <stdio.h>
 
-void yyparse();
+#include "tokens.h"
+
+extern int *yylval;
 
 int main(int argc, char* argv[]){
     if (argc != 2){
@@ -19,6 +21,8 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
+    init_lexer();
+    set_lexer_file(file);
     //yyparse();
 
     fclose(file);
