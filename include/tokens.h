@@ -25,7 +25,7 @@
 #define POUT 273
 #define RET 274
 #define CLASS 275
-#define FUNCT 276
+#define FUNCTION 276
 
 #define PES_I 277
 #define SINGLEF 278
@@ -38,5 +38,7 @@
 
 #define COMPTIME 284
 #define TOSF 285
+
+#define CTE_FLOAT 286
 
 #endif

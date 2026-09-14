@@ -1,4 +1,6 @@
 #include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
 
 #include "yylex.h"
 #include "tokens.h"
@@ -26,14 +28,18 @@ int as_consume(int c, char *buffer, int *len){
 int as_consume_comment(int c, char *buffer, int *len){
     *len = 0;
     buffer[0] = '\0';
+    numero_linea++;
 
     return 0;
 };
 
 int as_add_to_buffer(int c, char *buffer, int *len){
-    buffer[*len] = c;
-    (*len)++;
-    buffer[*len] = '\0';
+    if (*len < 1023){
+        buffer[*len] = c;
+        (*len)++;
+        buffer[*len] = '\0';
+    }
+    return 0;
 }
 
 
@@ -41,7 +47,7 @@ int as_retract_and_emit(int c, char *buffer, int *len) {
     //yylval = NULL;
     ungetc(c, archivo_fuente);
 
-    int caracter = buffer[*len];
+    int caracter = buffer[*len -1]; //buffer[0]
 
     *len = 0;
     buffer[0] = '\0';
@@ -59,7 +65,7 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
     ungetc(c, archivo_fuente);
     *len = 0;
     buffer[0] = '\0';
-    return SINGLEF;
+    return CTE_FLOAT;
 };
 
 int as_emit_token_INT(int c, char *buffer, int *len){
@@ -168,10 +174,10 @@ int as_PR_IDENT(int c, char *buffer, int *len){
         *len = 0;
         buffer[0] = '\0';
         return CLASS;
-    } else if (strcmp(cadena, "funct") == 0) {
+    } else if (strcmp(cadena, "function") == 0) {
         *len = 0;
         buffer[0] = '\0';
-        return FUNCT;
+        return FUNCTION;
     } else if (strcmp(cadena, "from") == 0) {
         *len = 0;
         buffer[0] = '\0';
@@ -196,7 +202,11 @@ int as_PR_IDENT(int c, char *buffer, int *len){
         *len = 0;
         buffer[0] = '\0';
         return TOSF;
-    } else {
+    } else if(strcmp(cadena,"singlef") == 0){
+        *len = 0;
+        buffer[0] = '\0';
+        return SINGLEF; //chequear si dejarlo o no
+    }else {
         if (id_valido(buffer)) {
             //yylval = insertar_simbolo(tabla_actual, buffer, ID, numero_linea);
             *len = 0;
@@ -204,5 +214,8 @@ int as_PR_IDENT(int c, char *buffer, int *len){
             return ID;
         }
     }
+    //limpio el buffer
+    *len = 0;
+    buffer[0] = '\0';
     return ID;
 }

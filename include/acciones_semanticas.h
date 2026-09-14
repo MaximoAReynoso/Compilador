@@ -1,8 +1,10 @@
-#ifndef actions_semanticas_h
-#define actions_semanticas_h
+#ifndef ACCIONES_SEMANTICAS_H
+#define ACCIONES_SEMANTICAS_H
 
 #include <stdio.h>
-#endif
+#include <stdbool.h> //libreria necesaria
+
+#include "tabla_simbolos.h"
 
 void establecer_tabla_simbolos(TablaSimbolos *tabla);
 
@@ -12,7 +14,7 @@ int as_consume(int c, char *buffer, int *len);
 
 int as_consume_comment(int c, char *buffer, int *len);
 
-int as_add_to_buffer(int c, char *buffer, int *len);
+int as_add_to_buffer(int c, char *buffer, int *len); //Devuelve un int, pero luego en el .c no devuelve nada
 
 int as_retract_and_emit(int c, char *buffer, int *len);
 
@@ -34,3 +36,5 @@ bool id_valido(char *buffer);
 
 int as_PR_IDENT(int c, char *buffer, int *len);
 
+
+#endif

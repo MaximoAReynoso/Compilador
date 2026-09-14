@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <string.h>
-#include <regex.h>
-#include <stdbool.h>
 
 #include "acciones_semanticas.h"
 #include "tokens.h"
 #include "tabla_simbolos.h"
 
-const int CANT_ESTADOS = 16;  //rangos de la matriz de transicion y acciones semanticas
-const int CANT_INPUTS = 128;
+#define CANT_ESTADOS 16  //rangos de la matriz de transicion y acciones semanticas
+#define CANT_INPUTS 128
 
 // DECLARACION DE VARIABLES
 
@@ -113,7 +111,7 @@ void init_lexer(){
         if (matriz_transicion[9][i] == -1) matriz_transicion[9][i] = 9;
         if (matriz_transicion[11][i] == -1) matriz_transicion[11][i] = 15;
         if (matriz_transicion[13][i] == -1) matriz_transicion[13][i] = 15;
-    }
+    } 
 
 //llenado de la matriz de acciones semanticas
     matriz_acciones[0][32] = as_consume;                // " "
@@ -198,16 +196,28 @@ int yylex(){
     int estado = 0;
 
     while ((c = fgetc(archivo_fuente)) != EOF){
+        
+        if( c >= 128) // caracter extendido
+            c = 127; //otro
 
-        estado = matriz_transicion[estado][c];
         AccionSemantica accion = matriz_acciones[estado][c];
+        estado = matriz_transicion[estado][c];
 
-        if (estado == 15) {
+        if(estado == -1){ //error
+            printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", numero_linea,c,c);
             estado = 0;
-            return accion(c, buffer_lexema, &longitud_lexema);
+            longitud_lexema = 0;
+            buffer_lexema[0] = '\0';
+        }else if (estado == 15) { //estado Final
+            estado = 0; //proximo token
+            if (accion != NULL)
+                return accion(c, buffer_lexema, &longitud_lexema);
+        }else {
+            if(accion != NULL)
+                accion(c, buffer_lexema, &longitud_lexema);
         }
-
-        accion(c, buffer_lexema, &longitud_lexema);       
     }
+
+    return 0; //EOF
 
 }

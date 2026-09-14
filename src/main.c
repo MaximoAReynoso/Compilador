@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "tokens.h"
+#include "yylex.h"
 
 extern int *yylval;
 
@@ -24,6 +25,10 @@ int main(int argc, char* argv[]){
     init_lexer();
     set_lexer_file(file);
     //yyparse();
+    int token;
+    while ((token = yylex()) != 0) {
+        printf("Token reconocido: %d en linea %d\n", token, numero_linea);
+    }
 
     fclose(file);
     return 0;
