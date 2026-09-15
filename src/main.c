@@ -2,8 +2,10 @@
 
 #include "tokens.h"
 #include "yylex.h"
+#include "tabla_simbolos.h"
+#include "acciones_semanticas.h"
 
-extern int *yylval;
+Simbolo *yylval = NULL;
 
 int main(int argc, char* argv[]){
     if (argc != 2){
@@ -22,8 +24,14 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
+    TablaSimbolos tabla;
+    inicializar_tabla(&tabla);
+
+    establecer_tabla_simbolos(&tabla);
+
     init_lexer();
     set_lexer_file(file);
+
     //yyparse();
     int token;
     while ((token = yylex()) != 0) {
@@ -31,5 +39,6 @@ int main(int argc, char* argv[]){
     }
 
     fclose(file);
+    destruir_tabla(&tabla);
     return 0;
 }

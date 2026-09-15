@@ -14,6 +14,7 @@ int numero_linea = 1;
 char buffer_lexema[1024] = "";
 int longitud_lexema = 0;
 FILE *archivo_fuente = NULL;
+Simbolo *yylval;
 
 typedef int (*AccionSemantica)(int c, char *buffer, int *len);         // Definicion de tipo para las acciones semanticas
 

@@ -8,7 +8,7 @@
 #include "tabla_simbolos.h"
 
 static TablaSimbolos *tabla_actual;
-
+#define MAX_LONG_ID 22
 void establecer_tabla_simbolos(TablaSimbolos *tabla) {
     tabla_actual = tabla;
 }
@@ -34,6 +34,8 @@ int as_consume_comment(int c, char *buffer, int *len){
 };
 
 int as_add_to_buffer(int c, char *buffer, int *len){
+    if( c == '\n')
+        numero_linea++;
     if (*len < 1023){
         buffer[*len] = c;
         (*len)++;
@@ -44,7 +46,7 @@ int as_add_to_buffer(int c, char *buffer, int *len){
 
 
 int as_retract_and_emit(int c, char *buffer, int *len) {
-    //yylval = NULL;
+    yylval = NULL;
     ungetc(c, archivo_fuente);
 
     int caracter = buffer[*len -1]; //buffer[0]
@@ -56,13 +58,13 @@ int as_retract_and_emit(int c, char *buffer, int *len) {
 }
 
 int as_classify_and_emit(int c, char *buffer, int *len){
-    //yylval = NULL;
+    yylval = NULL;
     return c;
 }
 
 int as_emit_token_FLOAT(int c, char *buffer, int *len){
-    //yylval = insertar_simbolo(tabla_actual, buffer, SINGLEF, numero_linea);
     ungetc(c, archivo_fuente);
+    yylval = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT, numero_linea);
     *len = 0;
     buffer[0] = '\0';
     return CTE_FLOAT;
@@ -72,28 +74,28 @@ int as_emit_token_INT(int c, char *buffer, int *len){
     buffer[*len] = 'i';
     (*len)++;
     buffer[*len] = '\0';
-    //yylval = insertar_simbolo(tabla_actual, buffer, PES_I, numero_linea);
+    yylval = insertar_simbolo(tabla_actual, buffer, PES_I, numero_linea);
     *len = 0;
     buffer[0] = '\0';
     return PES_I;
 }
 
 int as_emit_token_ASIG(int c, char *buffer, int *len){
-    //yylval = NULL;
+    yylval = NULL;
     *len = 0;
     buffer[0] = '\0';
     return ASSIGN;
 }
 
 int as_emit_token_NEQ(int c, char *buffer, int *len){
-    //yylval = NULL;
+    yylval = NULL;
     *len = 0;
     buffer[0] = '\0';
     return NE;
 }
 
 int as_emit_token_comp(int c, char *buffer, int *len){
-    //yylval = NULL;
+    yylval = NULL;
     int value = 0;
     if (buffer[0] == '=') {
         value = EQ;
@@ -108,7 +110,17 @@ int as_emit_token_comp(int c, char *buffer, int *len){
 }
 
 int as_emit_token_string(int c, char *buffer, int *len){
-    //yylval = insertar_simbolo(tabla_actual, buffer, MULT_STRING, numero_linea);
+    int j = 0; 
+    for (int i = 0; buffer[i] != '\0'; i++) { // elimino los saltos de limnea 
+        if (buffer[i] != '\n' && buffer[i] != '\r') {
+            buffer[j++] = buffer[i];
+        }
+    }
+    buffer[j++] = '"';// comilla de cierre
+    buffer[j] = '\0';
+    *len = j;
+
+    yylval = insertar_simbolo(tabla_actual, buffer, MULT_STRING, numero_linea);
     *len = 0;
     buffer[0] = '\0';
     return MULT_STRING;
@@ -141,7 +153,7 @@ int as_PR_IDENT(int c, char *buffer, int *len){
         cadena[i] = (char)tolower((unsigned char)cadena[i]);
     }
 
-
+    yylval = NULL;
     if (strcmp(cadena, "if") == 0) {
         *len = 0;
         buffer[0] = '\0';
@@ -205,10 +217,16 @@ int as_PR_IDENT(int c, char *buffer, int *len){
     } else if(strcmp(cadena,"singlef") == 0){
         *len = 0;
         buffer[0] = '\0';
-        return SINGLEF; //chequear si dejarlo o no
+        return SINGLEF; 
     }else {
         if (id_valido(buffer)) {
-            //yylval = insertar_simbolo(tabla_actual, buffer, ID, numero_linea);
+            if(strlen(buffer) > MAX_LONG_ID){
+                printf("WARNING (linea %d): El identificador (%s) supera los %d caracteres. Se trunco a '%.*s'. \n", 
+                                numero_linea, buffer, MAX_LONG_ID,MAX_LONG_ID,buffer);
+                buffer[MAX_LONG_ID] = '\0'; //trunca
+                *len = MAX_LONG_ID;
+            }
+            yylval = insertar_simbolo(tabla_actual, buffer, ID, numero_linea);
             *len = 0;
             buffer[0] = '\0';
             return ID;
