@@ -1,0 +1,12 @@
+SINGLEF
+singlef
+Singlef
+singlef_var
+1.0
+.6
+15.2
+0.0
+3.0s-5
+.2s34
+2.5s-1
+1.2s+10
