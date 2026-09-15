@@ -9,6 +9,10 @@
 
 static TablaSimbolos *tabla_actual;
 #define MAX_LONG_ID 22
+#define MIN_INT_CTE 32768
+#define MAX_INT_CTE 32767
+
+
 void establecer_tabla_simbolos(TablaSimbolos *tabla) {
     tabla_actual = tabla;
 }
@@ -17,7 +21,6 @@ int as_count_line(int c, char *buffer, int *len){
     numero_linea++;
     *len = 0;
     buffer[0] = '\0';
-
     return 0;
 };
 
@@ -29,18 +32,19 @@ int as_consume_comment(int c, char *buffer, int *len){
     *len = 0;
     buffer[0] = '\0';
     numero_linea++;
-
+    printf("\n");
     return 0;
 };
 
 int as_add_to_buffer(int c, char *buffer, int *len){
     if( c == '\n')
-        numero_linea++;
+    numero_linea++;
     if (*len < 1023){
         buffer[*len] = c;
         (*len)++;
         buffer[*len] = '\0';
     }
+    printf("Se retorna as_add_to_buffer:%c \n", c);
     return 0;
 }
 
@@ -53,12 +57,13 @@ int as_retract_and_emit(int c, char *buffer, int *len) {
 
     *len = 0;
     buffer[0] = '\0';
-
+    printf("Se retorna as_retract_and_emit:%c \n", c);
     return caracter;
 }
 
 int as_classify_and_emit(int c, char *buffer, int *len){
     yylval = NULL;
+    printf("Se retorna as_classify_and_emit:%c \n", c);
     return c;
 }
 
@@ -67,16 +72,23 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
     yylval = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT, numero_linea);
     *len = 0;
     buffer[0] = '\0';
+    printf("Se retorna as_emit_token_FLOAT:%c \n", c);
     return CTE_FLOAT;
 };
 
 int as_emit_token_INT(int c, char *buffer, int *len){
+    //if(c < MIN_INT_CTE || c > MAX_INT_CTE){
+    //    printf("El valor '%d' a provocado overflow en la linea '%d'", buffer);
+    //    return 0;
+    //}
+    
     buffer[*len] = 'i';
     (*len)++;
     buffer[*len] = '\0';
     yylval = insertar_simbolo(tabla_actual, buffer, PES_I, numero_linea);
     *len = 0;
     buffer[0] = '\0';
+    printf("Se retorna as_emit_token_INT:%c \n", c);
     return PES_I;
 }
 
@@ -84,6 +96,7 @@ int as_emit_token_ASIG(int c, char *buffer, int *len){
     yylval = NULL;
     *len = 0;
     buffer[0] = '\0';
+    printf("Se retorna as_emit_token_ASIG:%c \n", c);
     return ASSIGN;
 }
 
@@ -91,6 +104,7 @@ int as_emit_token_NEQ(int c, char *buffer, int *len){
     yylval = NULL;
     *len = 0;
     buffer[0] = '\0';
+    printf("Se retorna as_emit_token_NEQ:%c \n", c);
     return NE;
 }
 
@@ -106,6 +120,7 @@ int as_emit_token_comp(int c, char *buffer, int *len){
     }
     *len = 0;
     buffer[0] = '\0';
+    printf("Se retorna as_emit_token_comp:%c \n", c);
     return value;
 }
 
@@ -123,6 +138,7 @@ int as_emit_token_string(int c, char *buffer, int *len){
     yylval = insertar_simbolo(tabla_actual, buffer, MULT_STRING, numero_linea);
     *len = 0;
     buffer[0] = '\0';
+    printf("Se retorna :%c \n", c);
     return MULT_STRING;
 }
 
@@ -152,7 +168,7 @@ int as_PR_IDENT(int c, char *buffer, int *len){
     for (int i = 0; cadena[i] != '\0'; i++) {
         cadena[i] = (char)tolower((unsigned char)cadena[i]);
     }
-
+    printf(" \n as_PR_IDENT");
     yylval = NULL;
     if (strcmp(cadena, "if") == 0) {
         *len = 0;

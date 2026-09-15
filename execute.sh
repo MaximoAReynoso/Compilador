@@ -1,1 +1,1 @@
-gcc -Wall -Iinclude src/main.c src/tabla_simbolos.c src/lex/yylex.c src/lex/acciones_semanticas.c -o main
+gcc -Wall -Wextra src/main.c src/lex/yylex.c src/lex/acciones_semanticas.c src/tabla_simbolos.c -Iinclude -o compilador
