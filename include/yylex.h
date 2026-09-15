@@ -2,6 +2,7 @@
 #define YYLEX_H
 
 #include <stdio.h>
+#include "tabla_simbolos.h"
 
 extern int numero_linea;
 extern char buffer_lexema[1024];

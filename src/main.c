@@ -5,7 +5,6 @@
 #include "tabla_simbolos.h"
 #include "acciones_semanticas.h"
 
-Simbolo *yylval = NULL;
 
 int main(int argc, char* argv[]){
     if (argc != 2){
