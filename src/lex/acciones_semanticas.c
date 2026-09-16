@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
