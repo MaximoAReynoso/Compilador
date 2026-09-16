@@ -195,13 +195,10 @@ void init_lexer(){
 int yylex(){
     int c;
     int estado = 0;
+    AccionSemantica accion;
 
     while ((c = fgetc(archivo_fuente)) != EOF){
-        
-        if( c >= 128) // caracter extendido
-            c = 127; //otro
-
-        AccionSemantica accion = matriz_acciones[estado][c];
+        accion = matriz_acciones[estado][c];
         estado = matriz_transicion[estado][c];
 
         if(estado == -1){ //error
@@ -220,5 +217,4 @@ int yylex(){
     }
 
     return 0; //EOF
-
 }
