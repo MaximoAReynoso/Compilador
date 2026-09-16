@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     int token;
     while ((token = yylex()) != 0) {
         if (token >= 256) {
-            printf("[Línea %d] Token: %-22s (ID: %d)\n",numero_linea, nombre_token(token), token);
+            printf("[Línea %d] (ID: %d)\n",numero_linea, token);
         } else {
             printf("[Línea %d] Símbolo simple: '%c'(ASCII: %d)\n", numero_linea, (char)token, token);
         }

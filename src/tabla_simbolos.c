@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static unsigned hash(const char *lexema);
-
 static unsigned hash(const char *lexema) {
     unsigned hash_value = 0;
 
