@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <ctype.h>
 #include <string.h>
 
 #include "yylex.h"
@@ -51,13 +50,19 @@ int as_add_to_buffer(int c, char *buffer, int *len){
 
 int as_retract_and_emit(int c, char *buffer, int *len) {
     yylval = NULL;
-    ungetc(c, archivo_fuente);
+    if (c != EOF) {
+        ungetc(c, archivo_fuente);
+    }
 
     int caracter = buffer[*len -1]; //buffer[0]
 
     *len = 0;
     buffer[0] = '\0';
-    printf("Se retorna as_retract_and_emit:%c \n", c);
+    if (c != EOF) {
+        printf("Se retorna as_retract_and_emit:%c \n", c);
+    } else {
+        printf("Se retorna as_retract_and_emit: EOF\n");
+    }
     return caracter;
 }
 
@@ -68,11 +73,17 @@ int as_classify_and_emit(int c, char *buffer, int *len){
 }
 
 int as_emit_token_FLOAT(int c, char *buffer, int *len){
-    ungetc(c, archivo_fuente);
+    if (c != EOF) {
+        ungetc(c, archivo_fuente);
+    }
     yylval = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT, numero_linea);
     *len = 0;
     buffer[0] = '\0';
-    printf("Se retorna as_emit_token_FLOAT:%c \n", c);
+    if (c != EOF) {
+        printf("Se retorna as_emit_token_FLOAT:%c \n", c);
+    } else {
+        printf("Se retorna as_emit_token_FLOAT: EOF\n");
+    }
     return CTE_FLOAT;
 };
 
@@ -161,7 +172,9 @@ bool id_valido(char *buffer) {
 }
 
 int as_PR_IDENT(int c, char *buffer, int *len){
-    ungetc(c, archivo_fuente);    //retraer caracter que trajo a este estado
+    if (c != EOF) {
+        ungetc(c, archivo_fuente);    //retraer caracter que trajo a este estado
+    }
 
     char *cadena = buffer;
 

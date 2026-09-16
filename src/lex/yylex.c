@@ -219,6 +219,32 @@ int yylex(){
         }
     }
 
+    if (estado != 0) {
+        if (matriz_transicion[estado][0] == 15) {
+            // Estados que finalizan por delimitador: ID / palabra reservada (13), FLOAT (5, 7), operadores (8, 11)
+            AccionSemantica accion = matriz_acciones[estado][0];
+            estado = 0;
+            if (accion != NULL) {
+                return accion(EOF, buffer_lexema, &longitud_lexema);
+            }
+        } else if (estado == 9) {
+            // Fin de archivo dentro de un comentario de una linea: se descarta
+            estado = 0;
+            longitud_lexema = 0;
+            buffer_lexema[0] = '\0';
+        } else if (estado == 3) {
+            printf("Error lexico en linea %d: cadena no cerrada antes de fin de archivo\n", numero_linea);
+            estado = 0;
+            longitud_lexema = 0;
+            buffer_lexema[0] = '\0';
+        } else {
+            printf("Error lexico en linea %d: fin de archivo inesperado\n", numero_linea);
+            estado = 0;
+            longitud_lexema = 0;
+            buffer_lexema[0] = '\0';
+        }
+    }
+
     return 0; //EOF
 
 }
