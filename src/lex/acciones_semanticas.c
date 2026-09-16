@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
-#include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
 #include <float.h>
