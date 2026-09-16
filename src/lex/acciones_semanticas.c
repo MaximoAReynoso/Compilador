@@ -1,6 +1,10 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <float.h>
 
 #include "yylex.h"
 #include "tokens.h"
@@ -9,8 +13,7 @@
 
 static TablaSimbolos *tabla_actual;
 #define MAX_LONG_ID 22
-#define MIN_INT_CTE 32768
-#define MAX_INT_CTE 32767
+#define MAX_INT_CTE 32768
 
 
 void establecer_tabla_simbolos(TablaSimbolos *tabla) {
@@ -69,7 +72,40 @@ int as_classify_and_emit(int c, char *buffer, int *len){
 
 int as_emit_token_FLOAT(int c, char *buffer, int *len){
     ungetc(c, archivo_fuente);
+
+    char buffer_aux[1024];
+    strncpy(buffer_aux, buffer, sizeof(buffer_aux) - 1);
+    buffer_aux[sizeof(buffer_aux) - 1] = '\0';
+
+    for (int i = 0; buffer_aux[i] != '\0'; i++) { //se cambia s por e, debido a que strtof tiene de estandar un e en vez de s
+        if (buffer_aux[i] == 's' || buffer_aux[i] == 'S') {
+            buffer_aux[i] = 'e';
+        }
+    }
+
+    char *ptr;
+    errno=0;
+    float valor = strtof(buffer_aux, &ptr);
+
+    if (valor != 0.0f) {
+            if (errno == ERANGE || valor < FLT_MIN) {
+                printf("Error lexico [Línea %d]: Underflow en constante float '%s' (menor a %e)\n", numero_linea, buffer, FLT_MIN);
+                *len = 0;
+                buffer[0] = '\0';
+                return -1;
+            }
+
+            if (valor > FLT_MAX) {
+                printf("Error lexico [Línea %d]: Overflow en constante float '%s' (mayor a %e)\n",
+                       numero_linea, buffer, FLT_MAX);
+                *len = 0;
+                buffer[0] = '\0';
+                return -1;
+            }
+    }
+
     yylval = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT, numero_linea);
+    
     *len = 0;
     buffer[0] = '\0';
     printf("Se retorna as_emit_token_FLOAT:%c \n", c);
@@ -77,10 +113,28 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
 };
 
 int as_emit_token_INT(int c, char *buffer, int *len){
-    //if(c < MIN_INT_CTE || c > MAX_INT_CTE){
-    //    printf("El valor '%d' a provocado overflow en la linea '%d'", buffer);
-    //    return 0;
-    //}
+
+    errno = 0;
+
+    char *ptr;
+    
+    long valor = strtoll(buffer,&ptr, 10);
+
+    if (errno == ERANGE) {// captura del error causado por C
+        char *mensaje_error_c = strerror(errno); 
+        printf("Error lexico [Línea %d]: Fallo en '%s' -> C reporta: \"%s\"\n", numero_linea, buffer, mensaje_error_c);
+        *len = 0;
+        buffer[0] = '\0';
+        return -1;
+    }
+
+    // asumo que todos los valores son positivos
+    if(valor > MAX_INT_CTE){ // c== 32768, asumo que es negativo
+        printf("Error lexico [Línea %d]: El valor '%ld'excede el rango de 16 bits [%d]\n", numero_linea, valor,MAX_INT_CTE);
+        *len = 0;
+        buffer[0] = '\0';
+        return -1;
+    }
     
     buffer[*len] = 'i';
     (*len)++;
