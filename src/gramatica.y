@@ -26,7 +26,7 @@ void yyerror(const char *s);
 %%
 
 programa:
-    ID bloque_declarativo BEGIN bloque_ejecutable END ';'
+    ID { printf("Estructura Programa\n"); } bloque_declarativo BEGIN bloque_ejecutable END ';'
     { printf("Sintaxis correcta: Programa reconocido con éxito.\n"); }
 ;
 
@@ -63,16 +63,16 @@ declaracion_variable:
 
 lista_variables:
     lista_variables ',' ID
-  | ID
+  | ID { printf("Estructura Variable\n"); }
 ;
 
 declaracion_objeto:
-    ID lista_variables
+    ID { printf("Estructura Objeto\n"); } lista_variables
 ;
 
 declaracion_funcion:
-    tipo_dato FUNCTION ID '(' lista_parametros ')' bloque_declarativo BEGIN bloque_ejecutable END
-  | tipo_dato ID '(' lista_parametros ')' BEGIN bloque_ejecutable END
+    tipo_dato FUNCTION ID '(' lista_parametros ')' { printf("Estructura FUNCTION\n"); } bloque_declarativo BEGIN bloque_ejecutable END
+  	| tipo_dato ID '(' lista_parametros ')' { printf("Estructura FUNCTION\n"); } BEGIN bloque_ejecutable END
 ;
 
 lista_parametros:
@@ -85,7 +85,7 @@ parametro:
 ;
 
 declaracion_clase:
-    CLASS ID codigo_clase encabezado_clase miembros_clase END
+    CLASS ID { printf("Estructura CLASS\n"); } codigo_clase encabezado_clase miembros_clase END
 ;
 
 codigo_clase:
@@ -127,11 +127,13 @@ sentencia:
 
 sentencia_retorno:
     RET '(' expresion_aritmetica ')'
+	{ printf("Estructura RET\n"); }
   | RET '(' ')'
+  { printf("Estructura RET\n"); }
 ;
 
 asignacion:
-    destino ASSIGN expresion_aritmetica
+    destino ASSIGN { printf("Estructura ASSIGN\n"); } expresion_aritmetica
 ;
 
 destino:
@@ -193,11 +195,11 @@ constante:
 ;
 
 if_sentencia:
-    IF '(' condicion ')' bloque_o_sentencia rama_else END_IF
+    IF '(' condicion ')' { printf("Estructura IF\n"); } bloque_o_sentencia rama_else END_IF
 ;
 
 rama_else:
-    ELSE bloque_o_sentencia
+    ELSE { printf("Estructura ELSE\n"); } bloque_o_sentencia
   | 
 ;
 
@@ -221,7 +223,9 @@ operador_relacional:
 
 impresion:
     POUT '(' expresion_aritmetica ')'
+	{ printf("Estructura POUT\n"); }
   | POUT '(' MULT_STRING ')'
+    { printf("Estructura POUT\n"); }
 ;
 
 %%
