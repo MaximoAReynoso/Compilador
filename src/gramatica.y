@@ -26,7 +26,7 @@ void yyerror(const char *s);
 %%
 
 programa:
-    ID bloque_declarativo BEGIN bloque_ejecutable END
+    ID bloque_declarativo BEGIN bloque_ejecutable END ';'
     { printf("Sintaxis correcta: Programa reconocido con éxito.\n"); }
 ;
 
