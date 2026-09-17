@@ -54,7 +54,6 @@ int as_add_to_buffer(int c, char *buffer, int *len){
 
 int as_retract_and_emit(int c, char *buffer, int *len) {
     yylval.simbolo = NULL;
-
     if (c != EOF) {
         ungetc(c, archivo_fuente);
     }
@@ -69,6 +68,17 @@ int as_retract_and_emit(int c, char *buffer, int *len) {
         printf("Se retorna as_retract_and_emit: EOF\n");
     }
     return caracter;
+}
+
+int as_retract_and_emit_dot(int c, char *buffer, int *len) {
+    yylval.simbolo = NULL;
+    if (c != EOF) {
+        ungetc(c, archivo_fuente);
+    }
+    *len = 0;
+    buffer[0] = '\0';
+    printf("Se retorna as_retract_and_emit_dot:%c \n", '.');
+    return '.';
 }
 
 int as_classify_and_emit(int c, char *buffer, int *len){
@@ -153,11 +163,11 @@ int as_emit_token_INT(int c, char *buffer, int *len){
     buffer[*len] = 'i';
     (*len)++;
     buffer[*len] = '\0';
-    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, PES_I, yylineno);
+    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE, yylineno);
     *len = 0;
     buffer[0] = '\0';
     printf("Se retorna as_emit_token_INT:%c \n", c);
-    return PES_I;
+    return CTE;
 }
 
 int as_emit_token_ASIG(int c, char *buffer, int *len){

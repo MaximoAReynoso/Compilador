@@ -62,6 +62,7 @@ void init_lexer(){
     matriz_transicion[0][46] = 4;      //.
     matriz_transicion[1][46] = 4;
 
+
     matriz_transicion[0][33] = 10;      //!
     matriz_transicion[0][58] = 12;      //:
 
@@ -87,8 +88,11 @@ void init_lexer(){
     matriz_transicion[2][105] = 15;      //i
     matriz_transicion[13][95] = 13;      //_
     matriz_transicion[0][59] = 15;       //;
+    matriz_transicion[0][44] = 15;       //,
     matriz_transicion[0][40] = 15;       //(
     matriz_transicion[0][41] = 15;       //)
+    matriz_transicion[0][91] = 15;       //[
+    matriz_transicion[0][93] = 15;       //]
 
     //Mayusculas
     for (int i = 65; i <= 90; i++){
@@ -100,6 +104,7 @@ void init_lexer(){
     for (int i = 97; i <= 122; i++){
         matriz_transicion[0][i] = 13;
         matriz_transicion[13][i] = 13;
+        matriz_transicion[4][i] = 15;
     }
 
     //otros
@@ -164,8 +169,11 @@ void init_lexer(){
     matriz_acciones[2][105] = as_emit_token_INT;          //i
     matriz_acciones[13][95] = as_add_to_buffer;           //_
     matriz_acciones[0][59] = as_classify_and_emit;        //;
+    matriz_acciones[0][44] = as_classify_and_emit;        //,
     matriz_acciones[0][40] = as_classify_and_emit;        //(
     matriz_acciones[0][41] = as_classify_and_emit;        //)
+    matriz_acciones[0][91] = as_classify_and_emit;       //[
+    matriz_acciones[0][93] = as_classify_and_emit;       //]
 
         //Mayusculas
     for (int i = 65; i <= 90; i++){
@@ -177,6 +185,7 @@ void init_lexer(){
     for (int i = 97; i <= 122; i++){
         matriz_acciones[0][i] = as_add_to_buffer;
         matriz_acciones[13][i] = as_add_to_buffer;
+        matriz_acciones[4][i] = as_retract_and_emit_dot;
     }
 
         //otros
@@ -200,6 +209,7 @@ int yylex(){
         accion = matriz_acciones[estado][c];
         estado = matriz_transicion[estado][c];
 
+        //printf("estado: %d\n", estado);
         if(estado == -1){ //error
             printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", yylineno,c,c);
             estado = 0;

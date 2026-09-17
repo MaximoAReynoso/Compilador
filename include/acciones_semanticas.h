@@ -18,6 +18,8 @@ int as_add_to_buffer(int c, char *buffer, int *len);
 
 int as_retract_and_emit(int c, char *buffer, int *len);
 
+int as_retract_and_emit_dot(int c, char *buffer, int *len);
+
 int as_classify_and_emit(int c, char *buffer, int *len);
 
 int as_emit_token_FLOAT(int c, char *buffer, int *len);
