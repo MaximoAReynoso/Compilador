@@ -46,6 +46,11 @@ declaracion:
   | declaracion_funcion ';'
   | declaracion_clase ';'
   | declaracion_objeto ';'
+  | declaracion_comptime ';'
+;
+
+declaracion_comptime:
+    COMPTIME declaracion_variable
 ;
 
 tipo_dato:
@@ -87,7 +92,12 @@ parametro:
 ;
 
 declaracion_clase:
-    CLASS ID encabezado_clase miembros_clase END
+    CLASS ID codigo_clase encabezado_clase miembros_clase END
+;
+
+codigo_clase:
+    ID
+  | 
 ;
 
 encabezado_clase:
@@ -135,6 +145,7 @@ asignacion:
 destino:
     ID
   | ID '.' ID
+  | ID '[' expresion_aritmetica ']'
 ;
 
 expresion_aritmetica:
@@ -152,9 +163,21 @@ termino:
 operando:
     ID
   | ID '.' ID
-  | ID '(' parametros_reales ')'
-  | ID '.' ID '(' parametros_reales ')'
+  | ID '[' expresion_aritmetica ']'
+  | ID '(' parametros_reales ')' orden_evaluacion
+  | ID '.' ID '(' parametros_reales ')' orden_evaluacion
+  | TOSF '(' expresion_aritmetica ')'
   | constante
+;
+
+orden_evaluacion:
+    '[' lista_enteros ']'
+  | 
+;
+
+lista_enteros:
+    lista_enteros ',' CTE
+  | CTE
 ;
 
 parametros_reales:
@@ -163,8 +186,13 @@ parametros_reales:
 ;
 
 lista_parametros_reales:
-    lista_parametros_reales ',' expresion_aritmetica
-  | expresion_aritmetica
+    lista_parametros_reales ',' parametro_real
+  | parametro_real
+;
+
+parametro_real:
+    expresion_aritmetica
+  | ID '=' expresion_aritmetica
 ;
 
 constante:
