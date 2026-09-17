@@ -35,7 +35,7 @@ Simbolo *buscar_simbolo(TablaSimbolos *tabla, const char *lexema){
 
 }
 
-Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token, int linea) {
+Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token) {
 
     Simbolo *existe = buscar_simbolo(tabla, lexema);
     if (existe != NULL) {
@@ -56,7 +56,6 @@ Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token, i
 
     strcpy(nuevo_simbolo->lexema, lexema);
     nuevo_simbolo->token = token;
-    nuevo_simbolo->linea = linea;
     nuevo_simbolo->siguiente = tabla->entradas[index];
     tabla->entradas[index] = nuevo_simbolo;
 

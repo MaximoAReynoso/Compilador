@@ -119,7 +119,7 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
     if (c != EOF) {
         ungetc(c, archivo_fuente);
     }
-    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT, yylineno);
+    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT);
     
     printf("[LEX] Token emitido: CTE_FLOAT (lexema: '%s') en línea %d\n", buffer, yylineno);
     *len = 0;
@@ -154,7 +154,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
     buffer[*len] = 'i';
     (*len)++;
     buffer[*len] = '\0';
-    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE, yylineno);
+    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE);
     printf("[LEX] Token emitido: ASSIGN (:=) en línea %d\n", yylineno);
     *len = 0;
     buffer[0] = '\0';
@@ -209,7 +209,7 @@ int as_emit_token_string(int c, char *buffer, int *len){
     buffer[j] = '\0';
     *len = j;
 
-    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, MULT_STRING, yylineno);
+    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, MULT_STRING);
     printf("[LEX] Token emitido: MULT_STRING (lexema: %s) en línea %d\n", buffer, yylineno);
     *len = 0;
     buffer[0] = '\0';
@@ -335,7 +335,7 @@ int as_PR_IDENT(int c, char *buffer, int *len){
                 *len = MAX_LONG_ID;
                 printf("[LEX] Token emitido: ID (lexema: %s) en linea %d \n", buffer,yylineno);
             }
-            yylval.simbolo = insertar_simbolo(tabla_actual, buffer, ID, yylineno);
+            yylval.simbolo = insertar_simbolo(tabla_actual, buffer, ID);
             *len = 0;
             buffer[0] = '\0';
             return ID;
