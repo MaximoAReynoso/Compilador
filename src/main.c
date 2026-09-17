@@ -1,9 +1,21 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "tokens.h"
+#include "y.tab.h"
 #include "yylex.h"
 #include "tabla_simbolos.h"
 #include "acciones_semanticas.h"
+
+#include "y.tab.c"
+
+
+extern int yyparse();
+extern int yylineno;
+
+void yyerror(const char *s) {
+    fprintf(stderr, "Error sintáctico en línea %d: %s\n", yylineno, s);
+}
+
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -26,20 +38,22 @@ int main(int argc, char* argv[]) {
     init_lexer();
     set_lexer_file(file);
 
-    printf("--- Iniciando Analisis Lexico ---\n");
+    printf("--- Iniciando Analisis sintactico ---\n");
 
-    int token;
-    while ((token = yylex()) != 0) {
-        if (token >= 256) {
-            printf("[Línea %d] (ID: %d)\n",numero_linea, token);
-        } else {
-            printf("[Línea %d] Símbolo simple: '%c'(ASCII: %d)\n", numero_linea, (char)token, token);
-        }
+    int resultado = yyparse();
+
+        if (resultado == 0) {
+        printf("\n Compilacion exitosa: No se encontraron errores sintacticos.\n");
+    } else {
+        printf("\n Fallo el analisis sintactico.\n");
     }
 
     printf("--- Fin de archivo ---\n");
 
     fclose(file);
     destruir_tabla(&tabla);
+
+    //yylex_destroy();
+    
     return 0;
 }    

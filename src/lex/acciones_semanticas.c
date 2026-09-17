@@ -7,7 +7,7 @@
 #include <float.h>
 
 #include "yylex.h"
-#include "tokens.h"
+#include "y.tab.h"
 #include "acciones_semanticas.h"
 #include "tabla_simbolos.h"
 
@@ -21,7 +21,7 @@ void establecer_tabla_simbolos(TablaSimbolos *tabla) {
 }
 
 int as_count_line(int c, char *buffer, int *len){
-    numero_linea++;
+    yylineno++;
     *len = 0;
     buffer[0] = '\0';
     return 0;
@@ -34,14 +34,14 @@ int as_consume(int c, char *buffer, int *len){
 int as_consume_comment(int c, char *buffer, int *len){
     *len = 0;
     buffer[0] = '\0';
-    numero_linea++;
+    yylineno++;
     printf("\n");
     return 0;
 };
 
 int as_add_to_buffer(int c, char *buffer, int *len){
     if( c == '\n')
-    numero_linea++;
+    yylineno++;
     if (*len < 1023){
         buffer[*len] = c;
         (*len)++;
@@ -53,7 +53,8 @@ int as_add_to_buffer(int c, char *buffer, int *len){
 
 
 int as_retract_and_emit(int c, char *buffer, int *len) {
-    yylval = NULL;
+    yylval.simbolo = NULL;
+
     if (c != EOF) {
         ungetc(c, archivo_fuente);
     }
@@ -71,7 +72,7 @@ int as_retract_and_emit(int c, char *buffer, int *len) {
 }
 
 int as_classify_and_emit(int c, char *buffer, int *len){
-    yylval = NULL;
+    yylval.simbolo = NULL;
     printf("Se retorna as_classify_and_emit:%c \n", c);
     return c;
 }
@@ -95,7 +96,7 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
 
     if (valor != 0.0f) {
             if (errno == ERANGE || valor < FLT_MIN) {
-                printf("Error lexico [Línea %d]: Underflow en constante float '%s' (menor a %e)\n", numero_linea, buffer, FLT_MIN);
+                printf("Error lexico [Línea %d]: Underflow en constante float '%s' (menor a %e)\n", yylineno, buffer, FLT_MIN);
                 *len = 0;
                 buffer[0] = '\0';
                 return -1;
@@ -103,7 +104,7 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
 
             if (valor > FLT_MAX) {
                 printf("Error lexico [Línea %d]: Overflow en constante float '%s' (mayor a %e)\n",
-                       numero_linea, buffer, FLT_MAX);
+                       yylineno, buffer, FLT_MAX);
                 *len = 0;
                 buffer[0] = '\0';
                 return -1;
@@ -113,7 +114,7 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
     if (c != EOF) {
         ungetc(c, archivo_fuente);
     }
-    yylval = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT, numero_linea);
+    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT, yylineno);
     
     *len = 0;
     buffer[0] = '\0';
@@ -135,7 +136,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
 
     if (errno == ERANGE) {// captura del error causado por C
         char *mensaje_error_c = strerror(errno); 
-        printf("Error lexico [Línea %d]: Fallo en '%s' -> C reporta: \"%s\"\n", numero_linea, buffer, mensaje_error_c);
+        printf("Error lexico [Línea %d]: Fallo en '%s' -> C reporta: \"%s\"\n", yylineno, buffer, mensaje_error_c);
         *len = 0;
         buffer[0] = '\0';
         return -1;
@@ -143,7 +144,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
 
     // asumo que todos los valores son positivos
     if(valor > MAX_INT_CTE){ // c== 32768, asumo que es negativo
-        printf("Error lexico [Línea %d]: El valor '%ld'excede el rango de 16 bits [%d]\n", numero_linea, valor,MAX_INT_CTE);
+        printf("Error lexico [Línea %d]: El valor '%ld'excede el rango de 16 bits [%d]\n", yylineno, valor,MAX_INT_CTE);
         *len = 0;
         buffer[0] = '\0';
         return -1;
@@ -152,7 +153,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
     buffer[*len] = 'i';
     (*len)++;
     buffer[*len] = '\0';
-    yylval = insertar_simbolo(tabla_actual, buffer, PES_I, numero_linea);
+    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, PES_I, yylineno);
     *len = 0;
     buffer[0] = '\0';
     printf("Se retorna as_emit_token_INT:%c \n", c);
@@ -160,7 +161,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
 }
 
 int as_emit_token_ASIG(int c, char *buffer, int *len){
-    yylval = NULL;
+    yylval.simbolo = NULL;
     *len = 0;
     buffer[0] = '\0';
     printf("Se retorna as_emit_token_ASIG:%c \n", c);
@@ -168,7 +169,7 @@ int as_emit_token_ASIG(int c, char *buffer, int *len){
 }
 
 int as_emit_token_NEQ(int c, char *buffer, int *len){
-    yylval = NULL;
+    yylval.simbolo = NULL;
     *len = 0;
     buffer[0] = '\0';
     printf("Se retorna as_emit_token_NEQ:%c \n", c);
@@ -176,7 +177,7 @@ int as_emit_token_NEQ(int c, char *buffer, int *len){
 }
 
 int as_emit_token_comp(int c, char *buffer, int *len){
-    yylval = NULL;
+    yylval.simbolo = NULL;
     int value = 0;
     if (buffer[0] == '=') {
         value = EQ;
@@ -202,7 +203,7 @@ int as_emit_token_string(int c, char *buffer, int *len){
     buffer[j] = '\0';
     *len = j;
 
-    yylval = insertar_simbolo(tabla_actual, buffer, MULT_STRING, numero_linea);
+    yylval.simbolo = insertar_simbolo(tabla_actual, buffer, MULT_STRING, yylineno);
     *len = 0;
     buffer[0] = '\0';
     printf("Se retorna :%c \n", c);
@@ -238,7 +239,7 @@ int as_PR_IDENT(int c, char *buffer, int *len){
         cadena[i] = (char)tolower((unsigned char)cadena[i]);
     }
     printf(" \n as_PR_IDENT");
-    yylval = NULL;
+    yylval.simbolo = NULL;
     if (strcmp(cadena, "if") == 0) {
         *len = 0;
         buffer[0] = '\0';
@@ -307,11 +308,11 @@ int as_PR_IDENT(int c, char *buffer, int *len){
         if (id_valido(buffer)) {
             if(strlen(buffer) > MAX_LONG_ID){
                 printf("WARNING (linea %d): El identificador (%s) supera los %d caracteres. Se trunco a '%.*s'. \n", 
-                                numero_linea, buffer, MAX_LONG_ID,MAX_LONG_ID,buffer);
+                                yylineno, buffer, MAX_LONG_ID,MAX_LONG_ID,buffer);
                 buffer[MAX_LONG_ID] = '\0'; //trunca
                 *len = MAX_LONG_ID;
             }
-            yylval = insertar_simbolo(tabla_actual, buffer, ID, numero_linea);
+            yylval.simbolo = insertar_simbolo(tabla_actual, buffer, ID, yylineno);
             *len = 0;
             buffer[0] = '\0';
             return ID;

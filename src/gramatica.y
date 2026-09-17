@@ -4,12 +4,11 @@
 #include "tabla_simbolos.h"
 
 extern int yylex(void);
-extern int yylineno;
 void yyerror(const char *s);
 %}
 
 %union {
-    Simbolo *simbolo;
+    struct Simbolo *simbolo;
     int val_int;
 }
 

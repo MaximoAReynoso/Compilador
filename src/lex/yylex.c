@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "acciones_semanticas.h"
-#include "tokens.h"
+#include "y.tab.h"
 #include "tabla_simbolos.h"
 
 #define CANT_ESTADOS 16  //rangos de la matriz de transicion y acciones semanticas
@@ -10,11 +10,10 @@
 
 // DECLARACION DE VARIABLES
 
-int numero_linea = 1;
+int yylineno = 1;
 char buffer_lexema[1024] = "";
 int longitud_lexema = 0;
 FILE *archivo_fuente = NULL;
-Simbolo *yylval = NULL;
 
 typedef int (*AccionSemantica)(int c, char *buffer, int *len);         // Definicion de tipo para las acciones semanticas
 
@@ -202,7 +201,7 @@ int yylex(){
         estado = matriz_transicion[estado][c];
 
         if(estado == -1){ //error
-            printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", numero_linea,c,c);
+            printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", yylineno,c,c);
             estado = 0;
             longitud_lexema = 0;
             buffer_lexema[0] = '\0';
@@ -230,12 +229,12 @@ int yylex(){
             longitud_lexema = 0;
             buffer_lexema[0] = '\0';
         } else if (estado == 3) {
-            printf("Error lexico en linea %d: cadena no cerrada antes de fin de archivo\n", numero_linea);
+            printf("Error lexico en linea %d: cadena no cerrada antes de fin de archivo\n", yylineno);
             estado = 0;
             longitud_lexema = 0;
             buffer_lexema[0] = '\0';
         } else {
-            printf("Error lexico en linea %d: fin de archivo inesperado\n", numero_linea);
+            printf("Error lexico en linea %d: fin de archivo inesperado\n", yylineno);
             estado = 0;
             longitud_lexema = 0;
             buffer_lexema[0] = '\0';

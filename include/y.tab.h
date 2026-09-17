@@ -37,7 +37,7 @@
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
 typedef union YYSTYPE {
-    Simbolo *simbolo;
+    struct Simbolo *simbolo;
     int val_int;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
