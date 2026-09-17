@@ -1,8 +1,0 @@
-function calcular() 
-    begin 
-        x := 25$i; 
-        y := 3.14; 
-        if (x >= 10$i) 
-            pout "Hola mundo";
-        end_if; 
-    end;
