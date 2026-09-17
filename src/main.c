@@ -42,13 +42,14 @@ int main(int argc, char* argv[]) {
 
     int resultado = yyparse();
 
-        if (resultado == 0) {
+    if (resultado == 0) {
         printf("\n Compilacion exitosa: No se encontraron errores sintacticos.\n");
     } else {
         printf("\n Fallo el analisis sintactico.\n");
     }
 
-    printf("--- Fin de archivo ---\n");
+    printf("--- Fin de archivo ---\n\n");
+    imprimir_tabla(&tabla);
 
     fclose(file);
     destruir_tabla(&tabla);

@@ -25,6 +25,8 @@ Simbolo *insertar_simbolo(
     int linea
 );
 
+void imprimir_tabla(TablaSimbolos *tabla);
+
 void destruir_tabla(TablaSimbolos *tabla);
 
 #endif

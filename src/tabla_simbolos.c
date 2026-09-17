@@ -1,6 +1,7 @@
 #include "tabla_simbolos.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 static unsigned hash(const char *lexema) {
     unsigned hash_value = 0;
@@ -70,6 +71,18 @@ void destruir_tabla(TablaSimbolos *tabla) {
             actual = actual->siguiente;
             free(temp->lexema);
             free(temp);
+        }
+    }
+}
+
+void imprimir_tabla(TablaSimbolos *tabla){
+    printf("Tabla de Simbolos:\n");
+    for (int i = 0; i < TAM_TABLA; i++){
+        Simbolo *actual = tabla->entradas[i];
+        while (actual != NULL) {
+            Simbolo *temp = actual;
+            printf("Token: %i, Lexema: %s\n",temp->token, temp->lexema);
+            actual = actual->siguiente;
         }
     }
 }
