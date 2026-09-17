@@ -16,7 +16,7 @@ void yyerror(const char *s);
 %token <simbolo> ID CTE CTE_FLOAT PES_I MULT_STRING
 
 /* Operadores y Comparadores */
-%token ASSIGN_COLON ASSIGN GE LE GT LT EQ NE
+%token ASSIGN GE LE EQ NE
 
 /* Palabras reservadas */
 %token IF ELSE END_IF BEGIN END POUT RET CLASS FUNCTION SINGLEF
@@ -132,7 +132,6 @@ sentencia_retorno:
 
 asignacion:
     destino ASSIGN expresion_aritmetica
-  | destino ASSIGN_COLON expresion_aritmetica
 ;
 
 destino:
@@ -212,8 +211,8 @@ condicion:
 ;
 
 operador_relacional:
-    GT
-  | LT
+	'<'
+  | '>'
   | GE
   | LE
   | EQ
