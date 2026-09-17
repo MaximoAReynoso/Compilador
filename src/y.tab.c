@@ -5,7 +5,7 @@
 #define YYBYACC 1
 #define YYMAJOR 2
 #define YYMINOR 0
-#define YYPATCH 20241231
+#define YYPATCH 20240109
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -20,7 +20,7 @@
 
 #define YYPURE 0
 
-#line 2 "src/gramatica.y"
+#line 2 "gramatica.y"
 #include <stdio.h>
 #include <stdlib.h>
 #include "tabla_simbolos.h"
@@ -34,7 +34,7 @@ void yyerror(const char *s);
 #endif
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
-#line 11 "src/gramatica.y"
+#line 11 "gramatica.y"
 typedef union YYSTYPE {
     struct Simbolo *simbolo;
     int val_int;
@@ -445,37 +445,25 @@ static const YYINT yyctable[] = {                        -1,
 #define YYUNDFTOKEN 335
 #define YYTRANSLATE(a) ((a) > YYMAXTOKEN ? YYUNDFTOKEN : (a))
 #if YYDEBUG
-#ifndef NULL
-#define NULL (void*)0
-#endif
 static const char *const yyname[] = {
 
-"$end",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"'('","')'","'*'","'+'","','",
-"'-'","'.'","'/'",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"';'",
-"'<'","'='","'>'",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-"'['",NULL,"']'",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-NULL,NULL,NULL,NULL,NULL,NULL,"error","ID","CTE","CTE_FLOAT","PES_I",
-"MULT_STRING","ASSIGN","GE","LE","EQ","NE","IF","ELSE","END_IF","BEGIN","END",
-"POUT","RET","CLASS","FUNCTION","SINGLEF","FROM","TO","BY","REPEAT","COMPTIME",
-"TOSF","EXTENDS","LOWER_THAN_ELSE","$accept","programa","bloque_declarativo",
-"$$1","bloque_ejecutable","lista_declaraciones","declaracion",
-"declaracion_variable","declaracion_funcion","declaracion_clase",
-"declaracion_objeto","declaracion_comptime","lista_variables","tipo_dato","$$2",
-"lista_parametros","$$3","$$4","parametro","codigo_clase","$$5",
-"encabezado_clase","miembros_clase","miembro","lista_ejecutables","sentencia",
-"asignacion","if_sentencia","iteracion","impresion","sentencia_retorno",
+"$end",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,"'('","')'","'*'","'+'","','","'-'","'.'","'/'",0,0,0,0,0,0,0,0,0,0,0,
+"';'","'<'","'='","'>'",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+"'['",0,"']'",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,"error","ID","CTE","CTE_FLOAT","PES_I","MULT_STRING","ASSIGN",
+"GE","LE","EQ","NE","IF","ELSE","END_IF","BEGIN","END","POUT","RET","CLASS",
+"FUNCTION","SINGLEF","FROM","TO","BY","REPEAT","COMPTIME","TOSF","EXTENDS",
+"LOWER_THAN_ELSE","$accept","programa","bloque_declarativo","$$1",
+"bloque_ejecutable","lista_declaraciones","declaracion","declaracion_variable",
+"declaracion_funcion","declaracion_clase","declaracion_objeto",
+"declaracion_comptime","lista_variables","tipo_dato","$$2","lista_parametros",
+"$$3","$$4","parametro","codigo_clase","$$5","encabezado_clase",
+"miembros_clase","miembro","lista_ejecutables","sentencia","asignacion",
+"if_sentencia","iteracion","impresion","sentencia_retorno",
 "expresion_aritmetica","destino","$$6","termino","operando","parametros_reales",
 "orden_evaluacion","constante","lista_enteros","lista_parametros_reales",
 "parametro_real","condicion","bloque_o_sentencia","$$7","rama_else","$$8",
@@ -698,41 +686,41 @@ static YYSTACKDATA yystack;
 #if YYBTYACC
 
 /* Current parser state */
-static YYParseState *yyps = NULL;
+static YYParseState *yyps = 0;
 
 /* yypath != NULL: do the full parse, starting at *yypath parser state. */
-static YYParseState *yypath = NULL;
+static YYParseState *yypath = 0;
 
 /* Base of the lexical value queue */
-static YYSTYPE *yylvals = NULL;
+static YYSTYPE *yylvals = 0;
 
 /* Current position at lexical value queue */
-static YYSTYPE *yylvp = NULL;
+static YYSTYPE *yylvp = 0;
 
 /* End position of lexical value queue */
-static YYSTYPE *yylve = NULL;
+static YYSTYPE *yylve = 0;
 
 /* The last allocated position at the lexical value queue */
-static YYSTYPE *yylvlim = NULL;
+static YYSTYPE *yylvlim = 0;
 
 #if defined(YYLTYPE) || defined(YYLTYPE_IS_DECLARED)
 /* Base of the lexical position queue */
-static YYLTYPE *yylpsns = NULL;
+static YYLTYPE *yylpsns = 0;
 
 /* Current position at lexical position queue */
-static YYLTYPE *yylpp = NULL;
+static YYLTYPE *yylpp = 0;
 
 /* End position of lexical position queue */
-static YYLTYPE *yylpe = NULL;
+static YYLTYPE *yylpe = 0;
 
 /* The last allocated position at the lexical position queue */
-static YYLTYPE *yylplim = NULL;
+static YYLTYPE *yylplim = 0;
 #endif
 
 /* Current position at lexical token queue */
-static YYINT  *yylexp = NULL;
+static YYINT  *yylexp = 0;
 
-static YYINT  *yylexemes = NULL;
+static YYINT  *yylexemes = 0;
 #endif /* YYBTYACC */
 
 /* For use in generated program */
@@ -768,14 +756,14 @@ static int yygrowstack(YYSTACKDATA *data)
 
     i = (int) (data->s_mark - data->s_base);
     newss = (YYINT *)realloc(data->s_base, newsize * sizeof(*newss));
-    if (newss == NULL)
+    if (newss == 0)
         return YYENOMEM;
 
     data->s_base = newss;
     data->s_mark = newss + i;
 
     newvs = (YYSTYPE *)realloc(data->l_base, newsize * sizeof(*newvs));
-    if (newvs == NULL)
+    if (newvs == 0)
         return YYENOMEM;
 
     data->l_base = newvs;
@@ -783,7 +771,7 @@ static int yygrowstack(YYSTACKDATA *data)
 
 #if defined(YYLTYPE) || defined(YYLTYPE_IS_DECLARED)
     newps = (YYLTYPE *)realloc(data->p_base, newsize * sizeof(*newps));
-    if (newps == NULL)
+    if (newps == 0)
         return YYENOMEM;
 
     data->p_base = newps;
@@ -877,7 +865,7 @@ YYPARSE_DECL()
 #if YYDEBUG
     const char *yys;
 
-    if ((yys = getenv("YYDEBUG")) != NULL)
+    if ((yys = getenv("YYDEBUG")) != 0)
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
@@ -891,8 +879,8 @@ YYPARSE_DECL()
 #endif
 
 #if YYBTYACC
-    yyps = yyNewState(0); if (yyps == NULL) goto yyenomem;
-    yyps->save = NULL;
+    yyps = yyNewState(0); if (yyps == 0) goto yyenomem;
+    yyps->save = 0;
 #endif /* YYBTYACC */
     yym = 0;
     /* yyn is set below */
@@ -1404,186 +1392,186 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 29 "src/gramatica.y"
+#line 29 "gramatica.y"
 	{ printf("[SINT] Estructura Programa, en línea %d\n", yylineno); }
-#line 1410 "y.tab.c"
+#line 1398 "y.tab.c"
 break;
 case 2:
-#line 30 "src/gramatica.y"
+#line 30 "gramatica.y"
 	{ printf("Sintaxis correcta: Programa reconocido con éxito.\n"); }
-#line 1415 "y.tab.c"
+#line 1403 "y.tab.c"
 break;
 case 3:
-#line 32 "src/gramatica.y"
+#line 32 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta el nombre del programa al inicio."); yyerrok; }
-#line 1420 "y.tab.c"
+#line 1408 "y.tab.c"
 break;
 case 14:
-#line 56 "src/gramatica.y"
+#line 56 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta el tipo de dato en la declaración COMPTIME."); yyerrok; }
-#line 1425 "y.tab.c"
+#line 1413 "y.tab.c"
 break;
 case 19:
-#line 70 "src/gramatica.y"
+#line 70 "gramatica.y"
 	{ printf("[SINT] Estructura Variable, en línea %d\n", yylineno); }
-#line 1430 "y.tab.c"
+#line 1418 "y.tab.c"
 break;
 case 20:
-#line 74 "src/gramatica.y"
+#line 74 "gramatica.y"
 	{ printf("[SINT] Estructura Objeto, en línea %d\n", yylineno); }
-#line 1435 "y.tab.c"
+#line 1423 "y.tab.c"
 break;
 case 22:
-#line 78 "src/gramatica.y"
+#line 78 "gramatica.y"
 	{ printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); }
-#line 1440 "y.tab.c"
+#line 1428 "y.tab.c"
 break;
 case 24:
-#line 79 "src/gramatica.y"
+#line 79 "gramatica.y"
 	{ printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); }
-#line 1445 "y.tab.c"
+#line 1433 "y.tab.c"
 break;
 case 26:
-#line 81 "src/gramatica.y"
+#line 81 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta el nombre (identificador) de la función."); yyerrok; }
-#line 1450 "y.tab.c"
+#line 1438 "y.tab.c"
 break;
 case 30:
-#line 92 "src/gramatica.y"
+#line 92 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta el nombre del parámetro formal en la función."); yyerrok; }
-#line 1455 "y.tab.c"
+#line 1443 "y.tab.c"
 break;
 case 31:
-#line 94 "src/gramatica.y"
+#line 94 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta el tipo del parámetro formal en la función."); yyerrok; }
-#line 1460 "y.tab.c"
+#line 1448 "y.tab.c"
 break;
 case 32:
-#line 98 "src/gramatica.y"
+#line 98 "gramatica.y"
 	{ printf("[SINT] Estructura CLASS, en línea %d\n", yylineno); }
-#line 1465 "y.tab.c"
+#line 1453 "y.tab.c"
 break;
 case 34:
-#line 100 "src/gramatica.y"
+#line 100 "gramatica.y"
 	{ yyerror("Error sintáctico: Ausencia del código en la declaración de la clase."); yyerrok; }
-#line 1470 "y.tab.c"
+#line 1458 "y.tab.c"
 break;
 case 47:
-#line 132 "src/gramatica.y"
+#line 132 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta ';' al final de la sentencia o error en sentencia."); yyerrok; }
-#line 1475 "y.tab.c"
+#line 1463 "y.tab.c"
 break;
 case 48:
-#line 134 "src/gramatica.y"
+#line 134 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta ';' al final de la sentencia."); yyerrok; }
-#line 1480 "y.tab.c"
+#line 1468 "y.tab.c"
 break;
 case 54:
-#line 147 "src/gramatica.y"
+#line 147 "gramatica.y"
 	{ printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
-#line 1485 "y.tab.c"
+#line 1473 "y.tab.c"
 break;
 case 55:
-#line 149 "src/gramatica.y"
+#line 149 "gramatica.y"
 	{ printf("Estructura RET, en línea %d\n", yylineno); }
-#line 1490 "y.tab.c"
+#line 1478 "y.tab.c"
 break;
 case 56:
-#line 153 "src/gramatica.y"
+#line 153 "gramatica.y"
 	{ printf("[SINT] Estructura ASSIGN, en línea %d\n", yylineno); }
-#line 1495 "y.tab.c"
+#line 1483 "y.tab.c"
 break;
 case 58:
-#line 155 "src/gramatica.y"
+#line 155 "gramatica.y"
 	{ yyerror("Error sintáctico: Uso del símbolo '=' donde debe usarse ':='."); yyerrok; }
-#line 1500 "y.tab.c"
+#line 1488 "y.tab.c"
 break;
 case 65:
-#line 169 "src/gramatica.y"
+#line 169 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta operando en la expresión aritmética."); yyerrok; }
-#line 1505 "y.tab.c"
+#line 1493 "y.tab.c"
 break;
 case 66:
-#line 171 "src/gramatica.y"
+#line 171 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta operando en la expresión aritmética."); yyerrok; }
-#line 1510 "y.tab.c"
+#line 1498 "y.tab.c"
 break;
 case 70:
-#line 179 "src/gramatica.y"
+#line 179 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta operando en el término de la expresión."); yyerrok; }
-#line 1515 "y.tab.c"
+#line 1503 "y.tab.c"
 break;
 case 71:
-#line 181 "src/gramatica.y"
+#line 181 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta operando en el término de la expresión."); yyerrok; }
-#line 1520 "y.tab.c"
+#line 1508 "y.tab.c"
 break;
 case 80:
-#line 197 "src/gramatica.y"
+#line 197 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
-#line 1525 "y.tab.c"
+#line 1513 "y.tab.c"
 break;
 case 92:
-#line 227 "src/gramatica.y"
+#line 227 "gramatica.y"
 	{ printf("[SINT] Estructura IF, en línea %d\n", yylineno); }
-#line 1530 "y.tab.c"
+#line 1518 "y.tab.c"
 break;
 case 94:
-#line 229 "src/gramatica.y"
+#line 229 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta '(' en la condición de selección."); yyerrok; }
-#line 1535 "y.tab.c"
+#line 1523 "y.tab.c"
 break;
 case 95:
-#line 231 "src/gramatica.y"
+#line 231 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta ')' en la condición de selección."); yyerrok; }
-#line 1540 "y.tab.c"
+#line 1528 "y.tab.c"
 break;
 case 96:
-#line 235 "src/gramatica.y"
+#line 235 "gramatica.y"
 	{ printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); }
-#line 1545 "y.tab.c"
+#line 1533 "y.tab.c"
 break;
 case 100:
-#line 242 "src/gramatica.y"
+#line 242 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta el cuerpo en la iteración."); yyerrok; }
-#line 1550 "y.tab.c"
+#line 1538 "y.tab.c"
 break;
 case 102:
-#line 248 "src/gramatica.y"
+#line 248 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta identificador (ID) en el encabezado de la iteración."); yyerrok; }
-#line 1555 "y.tab.c"
+#line 1543 "y.tab.c"
 break;
 case 103:
-#line 250 "src/gramatica.y"
+#line 250 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta palabra clave 'FROM' en el encabezado de la iteración."); yyerrok; }
-#line 1560 "y.tab.c"
+#line 1548 "y.tab.c"
 break;
 case 104:
-#line 252 "src/gramatica.y"
+#line 252 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta 'TO' o constante en el encabezado de la iteración."); yyerrok; }
-#line 1565 "y.tab.c"
+#line 1553 "y.tab.c"
 break;
 case 106:
-#line 255 "src/gramatica.y"
+#line 255 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta '(' en la condición de la iteración."); yyerrok; }
-#line 1570 "y.tab.c"
+#line 1558 "y.tab.c"
 break;
 case 107:
-#line 257 "src/gramatica.y"
+#line 257 "gramatica.y"
 	{ yyerror("Error sintáctico: Falta ')' en la condición de la iteración."); yyerrok; }
-#line 1575 "y.tab.c"
+#line 1563 "y.tab.c"
 break;
 case 118:
-#line 284 "src/gramatica.y"
+#line 284 "gramatica.y"
 	{ printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
-#line 1580 "y.tab.c"
+#line 1568 "y.tab.c"
 break;
 case 119:
-#line 286 "src/gramatica.y"
+#line 286 "gramatica.y"
 	{ printf("Estructura POUT, en línea %d\n", yylineno); }
-#line 1585 "y.tab.c"
+#line 1573 "y.tab.c"
 break;
-#line 1587 "y.tab.c"
+#line 1575 "y.tab.c"
     default:
         break;
     }

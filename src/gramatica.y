@@ -283,7 +283,7 @@ impresion:
     POUT '(' expresion_aritmetica ')'
     { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
   | POUT '(' MULT_STRING ')'
-    { printf("Estructura POUT, en línea %d\n", yylineno); }
+    { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
 ;
 
 %%
