@@ -46,6 +46,7 @@ declaracion:
   | declaracion_funcion ';'
   | declaracion_clase ';'
   | declaracion_objeto ';'
+;
 
 tipo_dato:
     SHORTINT
@@ -91,7 +92,7 @@ declaracion_clase:
 
 encabezado_clase:
     BEGIN
-  |
+  | 
 ;
 
 miembros_clase:
@@ -106,7 +107,7 @@ miembro:
 
 bloque_ejecutable:
     lista_ejecutables
-    |
+  | 
 ;
 
 lista_ejecutables:
@@ -115,38 +116,41 @@ lista_ejecutables:
 ;
 
 sentencia:
-  asignacion
+    asignacion
+  | if_sentencia
+  | impresion
   | sentencia_retorno
 ;
 
 sentencia_retorno:
-  RET '(' expresion_aritmetica ')'
-    | RET '(' ')'
+    RET '(' expresion_aritmetica ')'
+  | RET '(' ')'
+;
 
 asignacion:
-  destino ASSIGN expresion_aritmetica
+    destino ASSIGN expresion_aritmetica
   | destino ASSIGN_COLON expresion_aritmetica
 ;
 
 destino:
-  ID
+    ID
   | ID '.' ID
 ;
 
 expresion_aritmetica:
-  expresion_aritmetica '+' termino
+    expresion_aritmetica '+' termino
   | expresion_aritmetica '-' termino
   | termino
 ;
 
 termino:
-  termino '*' operando
+    termino '*' operando
   | termino '/' operando
   | operando
 ;
 
 operando:
-  ID
+    ID
   | ID '.' ID
   | ID '(' parametros_reales ')'
   | ID '.' ID '(' parametros_reales ')'
@@ -154,18 +158,50 @@ operando:
 ;
 
 parametros_reales:
-  lista_parametros_reales
-  |
+    lista_parametros_reales
+  | 
 ;
 
 lista_parametros_reales:
-  lista_parametros_reales ',' expresion_aritmetica
+    lista_parametros_reales ',' expresion_aritmetica
   | expresion_aritmetica
 ;
 
 constante:
-  CTE
+    CTE
   | CTE_FLOAT
+;
+
+if_sentencia:
+    IF '(' condicion ')' bloque_o_sentencia rama_else END_IF
+;
+
+rama_else:
+    ELSE bloque_o_sentencia
+  | 
+;
+
+bloque_o_sentencia:
+    BEGIN bloque_ejecutable END
+  | sentencia
+;
+
+condicion:
+    expresion_aritmetica operador_relacional expresion_aritmetica
+;
+
+operador_relacional:
+    GT
+  | LT
+  | GE
+  | LE
+  | EQ
+  | NE
+;
+
+impresion:
+    POUT '(' expresion_aritmetica ')'
+  | POUT '(' MULT_STRING ')'
 ;
 
 %%
