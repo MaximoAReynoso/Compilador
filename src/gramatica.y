@@ -48,7 +48,14 @@ declaracion:
   | declaracion_objeto ';'
 
 tipo_dato:
-    SINGLEF
+    SHORTINT
+  | USHORTINT
+  | INTEGER
+  | UTINTEGER
+  | LONGINT
+  | ULONGINT
+  | SINGLEF
+  | DOUBLEF
 ;
 
 declaracion_variable:
@@ -98,54 +105,67 @@ miembro:
 ;
 
 bloque_ejecutable:
-    lista_asignaciones asignacion
+    lista_ejecutables
+    |
 ;
 
-lista_asignaciones:
-    asignacion'(' lista_parametros ')'
-  | 
+lista_ejecutables:
+    lista_ejecutables sentencia ';'
+  | sentencia ';'
 ;
+
+sentencia:
+  asignacion
+  | sentencia_retorno
+;
+
+sentencia_retorno:
+  RET '(' expresion_aritmetica ')'
+    | RET '(' ')'
 
 asignacion:
-    ID ASSIGN expresion_aritmetica
+  destino ASSIGN expresion_aritmetica
+  | destino ASSIGN_COLON expresion_aritmetica
+;
+
+destino:
+  ID
+  | ID '.' ID
 ;
 
 expresion_aritmetica:
-    operando operador expresion_aritmetica
-  | operando 
+  expresion_aritmetica '+' termino
+  | expresion_aritmetica '-' termino
+  | termino
+;
+
+termino:
+  termino '*' operando
+  | termino '/' operando
+  | operando
 ;
 
 operando:
-    ID                                           /* Variable */
-  | ID '(' parametros_reales ')'             /* invocacion a funcion */
-  | referencia
-  |                                             /* falta constantes u otras expresiones aritméticas */
+  ID
+  | ID '.' ID
+  | ID '(' parametros_reales ')'
+  | ID '.' ID '(' parametros_reales ')'
+  | constante
 ;
 
 parametros_reales:
-    parametros_reales parametro_real
-  | parametro_real
+  lista_parametros_reales
+  |
 ;
 
-parametro_real:
-    ID
+lista_parametros_reales:
+  lista_parametros_reales ',' expresion_aritmetica
   | expresion_aritmetica
-  |                                        /* falta constante */
-;
-
-referencia:
-    ID '.' ID '=' constante
 ;
 
 constante:
-    /* no se que poner */
+  CTE
+  | CTE_FLOAT
 ;
-
-
-
-
-
-
-
 
 %%
