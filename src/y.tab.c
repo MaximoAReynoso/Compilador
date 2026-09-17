@@ -1273,7 +1273,7 @@ yyreduce:
     {
 case 1:
 #line 30 "gramatica.y"
-	{ printf("Estructura Programa, en línea %d\n", yylineno);}
+	{ printf("[SINT] Estructura Programa, en línea %d\n", yylineno);}
 #line 1278 "y.tab.c"
 break;
 case 2:
@@ -1283,62 +1283,62 @@ case 2:
 break;
 case 17:
 #line 67 "gramatica.y"
-	{ printf("Estructura Variable, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura Variable, en línea %d\n", yylineno); }
 #line 1288 "y.tab.c"
 break;
 case 18:
 #line 71 "gramatica.y"
-	{ printf("Estructura Objeto, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura Objeto, en línea %d\n", yylineno); }
 #line 1293 "y.tab.c"
 break;
 case 20:
 #line 75 "gramatica.y"
-	{ printf("Estructura FUNCTION, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); }
 #line 1298 "y.tab.c"
 break;
 case 22:
 #line 76 "gramatica.y"
-	{ printf("Estructura FUNCTION, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); }
 #line 1303 "y.tab.c"
 break;
 case 27:
 #line 89 "gramatica.y"
-	{ printf("Estructura CLASS, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura CLASS, en línea %d\n", yylineno); }
 #line 1308 "y.tab.c"
 break;
 case 45:
 #line 131 "gramatica.y"
-	{ printf("Estructura RET, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
 #line 1313 "y.tab.c"
 break;
 case 46:
 #line 133 "gramatica.y"
-	{ printf("Estructura RET, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
 #line 1318 "y.tab.c"
 break;
 case 47:
 #line 137 "gramatica.y"
-	{ printf("Estructura ASSIGN, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura ASSIGN, en línea %d\n", yylineno); }
 #line 1323 "y.tab.c"
 break;
 case 77:
 #line 199 "gramatica.y"
-	{ printf("Estructura IF, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura IF, en línea %d\n", yylineno); }
 #line 1328 "y.tab.c"
 break;
 case 79:
 #line 203 "gramatica.y"
-	{ printf("Estructura ELSE, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); }
 #line 1333 "y.tab.c"
 break;
 case 91:
 #line 227 "gramatica.y"
-	{ printf("Estructura POUT, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
 #line 1338 "y.tab.c"
 break;
 case 92:
 #line 229 "gramatica.y"
-	{ printf("Estructura POUT, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
 #line 1343 "y.tab.c"
 break;
 #line 1345 "y.tab.c"

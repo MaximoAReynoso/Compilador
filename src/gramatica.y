@@ -27,7 +27,7 @@ void yyerror(const char *s);
 %%
 
 programa:
-    ID { printf("Estructura Programa, en línea %d\n", yylineno);} bloque_declarativo BEGIN bloque_ejecutable END ';'
+    ID { printf("[SINT] Estructura Programa, en línea %d\n", yylineno);} bloque_declarativo BEGIN bloque_ejecutable END ';'
     { printf("Sintaxis correcta: Programa reconocido con éxito.\n"); }
 ;
 
@@ -64,16 +64,16 @@ declaracion_variable:
 
 lista_variables:
     lista_variables ',' ID
-  | ID { printf("Estructura Variable, en línea %d\n", yylineno); }
+  | ID { printf("[SINT] Estructura Variable, en línea %d\n", yylineno); }
 ;
 
 declaracion_objeto:
-    ID { printf("Estructura Objeto, en línea %d\n", yylineno); } lista_variables
+    ID { printf("[SINT] Estructura Objeto, en línea %d\n", yylineno); } lista_variables
 ;
 
 declaracion_funcion:
-    tipo_dato FUNCTION ID '(' lista_parametros ')' { printf("Estructura FUNCTION, en línea %d\n", yylineno); } bloque_declarativo BEGIN bloque_ejecutable END
-  	| tipo_dato ID '(' lista_parametros ')' { printf("Estructura FUNCTION, en línea %d\n", yylineno); } BEGIN bloque_ejecutable END
+    tipo_dato FUNCTION ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } bloque_declarativo BEGIN bloque_ejecutable END
+  	| tipo_dato ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } BEGIN bloque_ejecutable END
 ;
 
 lista_parametros:
@@ -86,7 +86,7 @@ parametro:
 ;
 
 declaracion_clase:
-    CLASS ID { printf("Estructura CLASS, en línea %d\n", yylineno); } codigo_clase encabezado_clase miembros_clase END
+    CLASS ID { printf("[SINT] Estructura CLASS, en línea %d\n", yylineno); } codigo_clase encabezado_clase miembros_clase END
 ;
 
 codigo_clase:
@@ -128,13 +128,13 @@ sentencia:
 
 sentencia_retorno:
     RET '(' expresion_aritmetica ')'
-	{ printf("Estructura RET, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
   | RET '(' ')'
-  { printf("Estructura RET, en línea %d\n", yylineno); }
+  { printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
 ;
 
 asignacion:
-    destino ASSIGN { printf("Estructura ASSIGN, en línea %d\n", yylineno); } expresion_aritmetica
+    destino ASSIGN { printf("[SINT] Estructura ASSIGN, en línea %d\n", yylineno); } expresion_aritmetica
 ;
 
 destino:
@@ -196,11 +196,11 @@ constante:
 ;
 
 if_sentencia:
-    IF '(' condicion ')' { printf("Estructura IF, en línea %d\n", yylineno); } bloque_o_sentencia rama_else END_IF
+    IF '(' condicion ')' { printf("[SINT] Estructura IF, en línea %d\n", yylineno); } bloque_o_sentencia rama_else END_IF
 ;
 
 rama_else:
-    ELSE { printf("Estructura ELSE, en línea %d\n", yylineno); } bloque_o_sentencia
+    ELSE { printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); } bloque_o_sentencia
   | 
 ;
 
@@ -224,9 +224,9 @@ operador_relacional:
 
 impresion:
     POUT '(' expresion_aritmetica ')'
-	{ printf("Estructura POUT, en línea %d\n", yylineno); }
+	{ printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
   | POUT '(' MULT_STRING ')'
-    { printf("Estructura POUT, en línea %d\n", yylineno); }
+    { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
 ;
 
 %%
