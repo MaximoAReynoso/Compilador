@@ -54,14 +54,8 @@ declaracion_comptime:
 ;
 
 tipo_dato:
-    SHORTINT
-  | USHORTINT
-  | INTEGER
-  | UTINTEGER
-  | LONGINT
-  | ULONGINT
+  PES_I
   | SINGLEF
-  | DOUBLEF
 ;
 
 declaracion_variable:
