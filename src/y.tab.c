@@ -26,6 +26,7 @@
 #include "tabla_simbolos.h"
 
 extern int yylex(void);
+extern int yylineno;
 void yyerror(const char *s);
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
@@ -33,13 +34,13 @@ void yyerror(const char *s);
 #endif
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
-#line 10 "gramatica.y"
+#line 11 "gramatica.y"
 typedef union YYSTYPE {
     struct Simbolo *simbolo;
     int val_int;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 43 "y.tab.c"
+#line 44 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -1271,76 +1272,76 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 29 "gramatica.y"
-	{ printf("Estructura Programa\n"); }
-#line 1277 "y.tab.c"
+#line 30 "gramatica.y"
+	{ printf("Estructura Programa, en línea %d\n", yylineno);}
+#line 1278 "y.tab.c"
 break;
 case 2:
-#line 30 "gramatica.y"
+#line 31 "gramatica.y"
 	{ printf("Sintaxis correcta: Programa reconocido con éxito.\n"); }
-#line 1282 "y.tab.c"
+#line 1283 "y.tab.c"
 break;
 case 17:
-#line 66 "gramatica.y"
-	{ printf("Estructura Variable\n"); }
-#line 1287 "y.tab.c"
+#line 67 "gramatica.y"
+	{ printf("Estructura Variable, en línea %d\n", yylineno); }
+#line 1288 "y.tab.c"
 break;
 case 18:
-#line 70 "gramatica.y"
-	{ printf("Estructura Objeto\n"); }
-#line 1292 "y.tab.c"
+#line 71 "gramatica.y"
+	{ printf("Estructura Objeto, en línea %d\n", yylineno); }
+#line 1293 "y.tab.c"
 break;
 case 20:
-#line 74 "gramatica.y"
-	{ printf("Estructura FUNCTION\n"); }
-#line 1297 "y.tab.c"
+#line 75 "gramatica.y"
+	{ printf("Estructura FUNCTION, en línea %d\n", yylineno); }
+#line 1298 "y.tab.c"
 break;
 case 22:
-#line 75 "gramatica.y"
-	{ printf("Estructura FUNCTION\n"); }
-#line 1302 "y.tab.c"
+#line 76 "gramatica.y"
+	{ printf("Estructura FUNCTION, en línea %d\n", yylineno); }
+#line 1303 "y.tab.c"
 break;
 case 27:
-#line 88 "gramatica.y"
-	{ printf("Estructura CLASS\n"); }
-#line 1307 "y.tab.c"
+#line 89 "gramatica.y"
+	{ printf("Estructura CLASS, en línea %d\n", yylineno); }
+#line 1308 "y.tab.c"
 break;
 case 45:
-#line 130 "gramatica.y"
-	{ printf("Estructura RET\n"); }
-#line 1312 "y.tab.c"
+#line 131 "gramatica.y"
+	{ printf("Estructura RET, en línea %d\n", yylineno); }
+#line 1313 "y.tab.c"
 break;
 case 46:
-#line 132 "gramatica.y"
-	{ printf("Estructura RET\n"); }
-#line 1317 "y.tab.c"
+#line 133 "gramatica.y"
+	{ printf("Estructura RET, en línea %d\n", yylineno); }
+#line 1318 "y.tab.c"
 break;
 case 47:
-#line 136 "gramatica.y"
-	{ printf("Estructura ASSIGN\n"); }
-#line 1322 "y.tab.c"
+#line 137 "gramatica.y"
+	{ printf("Estructura ASSIGN, en línea %d\n", yylineno); }
+#line 1323 "y.tab.c"
 break;
 case 77:
-#line 198 "gramatica.y"
-	{ printf("Estructura IF\n"); }
-#line 1327 "y.tab.c"
+#line 199 "gramatica.y"
+	{ printf("Estructura IF, en línea %d\n", yylineno); }
+#line 1328 "y.tab.c"
 break;
 case 79:
-#line 202 "gramatica.y"
-	{ printf("Estructura ELSE\n"); }
-#line 1332 "y.tab.c"
+#line 203 "gramatica.y"
+	{ printf("Estructura ELSE, en línea %d\n", yylineno); }
+#line 1333 "y.tab.c"
 break;
 case 91:
-#line 226 "gramatica.y"
-	{ printf("Estructura POUT\n"); }
-#line 1337 "y.tab.c"
+#line 227 "gramatica.y"
+	{ printf("Estructura POUT, en línea %d\n", yylineno); }
+#line 1338 "y.tab.c"
 break;
 case 92:
-#line 228 "gramatica.y"
-	{ printf("Estructura POUT\n"); }
-#line 1342 "y.tab.c"
+#line 229 "gramatica.y"
+	{ printf("Estructura POUT, en línea %d\n", yylineno); }
+#line 1343 "y.tab.c"
 break;
-#line 1344 "y.tab.c"
+#line 1345 "y.tab.c"
     default:
         break;
     }
