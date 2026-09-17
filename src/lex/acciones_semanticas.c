@@ -155,7 +155,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
     (*len)++;
     buffer[*len] = '\0';
     yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE);
-    printf("[LEX] Token emitido: ASSIGN (:=) en línea %d\n", yylineno);
+    printf("[LEX] Token emitido: %s en línea %d\n", buffer, yylineno);
     *len = 0;
     buffer[0] = '\0';
     return CTE;
@@ -165,7 +165,7 @@ int as_emit_token_ASIG(int c, char *buffer, int *len){
     yylval.simbolo = NULL;
     *len = 0;
     buffer[0] = '\0';
-    printf("Token: %c \n", c);
+    printf("[LEX] Token emitido: ASSIGN (:=) en línea %d\n", yylineno);
     return ASSIGN;
 }
 
