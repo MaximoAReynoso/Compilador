@@ -83,6 +83,7 @@ declaracion_funcion:
 
 lista_parametros:
     lista_parametros ',' parametro
+  | lista_parametros error parametro { yyerror("Error sintáctico: Falta de “,” en declaración de variables."); yyerrok; }
   | parametro
 ;
 
@@ -105,9 +106,16 @@ codigo_clase:
   | 
 ;
 
+lista_clase:
+  lista_clase ',' ID
+  | ID
+;
+
 encabezado_clase:
     BEGIN
-  | 
+  | EXTENDS lista_clase BEGIN
+  | EXTENDS BEGIN
+  { yyerror("Error sintáctico: Ausencia de nombre o lista de clases después de extends."); yyerrok; }
 ;
 
 miembros_clase:
@@ -146,7 +154,7 @@ sentencia_retorno:
     RET '(' expresion_aritmetica ')'
     { printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
   | RET '(' ')'
-  { printf("Estructura RET, en línea %d\n", yylineno); }
+  { printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
 ;
 
 asignacion:
@@ -169,6 +177,8 @@ expresion_aritmetica:
     { yyerror("Error sintáctico: Falta operando en la expresión aritmética."); yyerrok; }
   | expresion_aritmetica '-' error
     { yyerror("Error sintáctico: Falta operando en la expresión aritmética."); yyerrok; }
+  | expresion_aritmetica termino
+    { yyerror("Error sintáctico: Falta operador en la expresión aritmética."); yyerrok; }
 ;
 
 termino:
@@ -224,16 +234,21 @@ constante:
 ;
 
 if_sentencia:
-    IF '(' condicion ')' { printf("[SINT] Estructura IF, en línea %d\n", yylineno); } bloque_o_sentencia rama_else END_IF
-  | IF error condicion ')' bloque_o_sentencia rama_else END_IF
+    IF '(' condicion ')' { printf("[SINT] Estructura IF, en línea %d\n", yylineno); } bloque_o_sentencia fin_if  
+  | IF error condicion ')' bloque_o_sentencia fin_if
     { yyerror("Error sintáctico: Falta '(' en la condición de selección."); yyerrok; }
-  | IF '(' condicion error bloque_o_sentencia rama_else END_IF
+  | IF '(' condicion error bloque_o_sentencia fin_if
     { yyerror("Error sintáctico: Falta ')' en la condición de selección."); yyerrok; }
 ;
 
+fin_if:
+  rama_else END_IF
+  | rama_else error { yyerror("Falta de end_if."); yyerrok; }
+  | error { yyerror("Falta de end_if."); yyerrok; }
+;
+
 rama_else:
-    ELSE { printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); } bloque_o_sentencia %prec ELSE
-  | %prec LOWER_THAN_ELSE
+    ELSE { printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); } bloque_o_sentencia
 ;
 
 iteracion:
@@ -284,6 +299,10 @@ impresion:
     { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
   | POUT '(' MULT_STRING ')'
     { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
+  | POUT '(' ')'
+    { yyerror("Falta argumento en sentencia pout."); yyerrok; }
+  | POUT error
+    { yyerror("Falta argumento en sentencia pout."); yyerrok; }
 ;
 
 %%
