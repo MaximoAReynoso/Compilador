@@ -13,6 +13,9 @@ extern int yyparse();
 extern int yylineno;
 
 void yyerror(const char *s) {
+    if (yychar != END) {
+        fprintf(stderr, "\nLínea %d: Error: Falta de delimitador de sentencias ejecutables END.\n\n", yylineno);
+    }
     fprintf(stderr, "\nLínea %d: %s\n\n", yylineno, s);
 }
 

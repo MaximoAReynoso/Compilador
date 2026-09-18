@@ -26,9 +26,9 @@ void yyerror(const char *s);
 %%
 
 programa:
-    ID { printf("[SINT] Estructura Programa, en línea %d\n", yylineno); } bloque_declarativo BEGIN bloque_ejecutable END ';'
+    ID { printf("[SINT] Estructura Programa, en línea %d\n", yylineno); } bloque_declarativo bloque_ejecutable ';'
     { printf("Sintaxis correcta: Programa reconocido con éxito.\n"); }
-  | error bloque_declarativo BEGIN bloque_ejecutable END ';'
+  | error bloque_declarativo bloque_ejecutable ';'
     { yyerror("Error: Falta el nombre del programa al inicio."); yyerrok; }
 ;
 
@@ -75,9 +75,9 @@ declaracion_objeto:
 ;
 
 declaracion_funcion:
-    tipo_dato FUNCTION ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } bloque_declarativo BEGIN bloque_ejecutable END
-  | tipo_dato ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } BEGIN bloque_ejecutable END
-  | tipo_dato FUNCTION error '(' lista_parametros ')' bloque_declarativo BEGIN bloque_ejecutable END
+    tipo_dato FUNCTION ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } bloque_declarativo bloque_ejecutable
+  | tipo_dato ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } bloque_ejecutable
+  | tipo_dato FUNCTION error '(' lista_parametros ')' bloque_declarativo bloque_ejecutable
     { yyerror("Error: Falta el nombre (identificador) de la función."); yyerrok; }
 ;
 
@@ -129,8 +129,12 @@ miembro:
 ;
 
 bloque_ejecutable:
-    lista_ejecutables
-  | 
+    BEGIN lista_ejecutables bloque_END
+  | error lista_ejecutables bloque_END { yyerror("Error: Falta de delimitador de sentencias ejecutables BEGIN."); yyerrok; }
+;
+
+bloque_END:
+  END
 ;
 
 lista_ejecutables:
@@ -277,7 +281,7 @@ cuerpo_iteracion:
 ;
 
 bloque_o_sentencia:
-    BEGIN bloque_ejecutable END
+  bloque_ejecutable
   | sentencia
 ;
 
