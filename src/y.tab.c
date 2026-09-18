@@ -1452,12 +1452,12 @@ case 2:
 break;
 case 3:
 #line 32 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta el nombre del programa al inicio."); yyerrok; }
+	{ yyerror("Error: Falta el nombre del programa al inicio."); yyerrok; }
 #line 1457 "y.tab.c"
 break;
 case 14:
 #line 56 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta el tipo de dato en la declaración COMPTIME."); yyerrok; }
+	{ yyerror("Error: Falta el tipo de dato en la declaración COMPTIME."); yyerrok; }
 #line 1462 "y.tab.c"
 break;
 case 19:
@@ -1482,22 +1482,22 @@ case 24:
 break;
 case 26:
 #line 81 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta el nombre (identificador) de la función."); yyerrok; }
+	{ yyerror("Error: Falta el nombre (identificador) de la función."); yyerrok; }
 #line 1487 "y.tab.c"
 break;
 case 28:
 #line 86 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta de “,” en declaración de variables."); yyerrok; }
+	{ yyerror("Error: Falta de “,” en declaración de variables."); yyerrok; }
 #line 1492 "y.tab.c"
 break;
 case 31:
 #line 93 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta el nombre del parámetro formal en la función."); yyerrok; }
+	{ yyerror("Error: Falta el nombre del parámetro formal en la función."); yyerrok; }
 #line 1497 "y.tab.c"
 break;
 case 32:
 #line 95 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta el tipo del parámetro formal en la función."); yyerrok; }
+	{ yyerror("Error: Falta el tipo del parámetro formal en la función."); yyerrok; }
 #line 1502 "y.tab.c"
 break;
 case 33:
@@ -1507,22 +1507,22 @@ case 33:
 break;
 case 35:
 #line 101 "gramatica.y"
-	{ yyerror("Error sintáctico: Ausencia del código en la declaración de la clase."); yyerrok; }
+	{ yyerror("Error: Ausencia del código en la declaración de la clase."); yyerrok; }
 #line 1512 "y.tab.c"
 break;
 case 42:
 #line 118 "gramatica.y"
-	{ yyerror("Error sintáctico: Ausencia de nombre o lista de clases después de extends."); yyerrok; }
+	{ yyerror("Error: Ausencia de nombre o lista de clases después de extends."); yyerrok; }
 #line 1517 "y.tab.c"
 break;
 case 51:
 #line 140 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta ';' al final de la sentencia o error en sentencia."); yyerrok; }
+	{ yyerror("Error: Falta ';' al final de la sentencia o error en sentencia."); yyerrok; }
 #line 1522 "y.tab.c"
 break;
 case 52:
 #line 142 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta ';' al final de la sentencia."); yyerrok; }
+	{ yyerror("Error: Falta ';' al final de la sentencia."); yyerrok; }
 #line 1527 "y.tab.c"
 break;
 case 58:
@@ -1542,37 +1542,37 @@ case 60:
 break;
 case 62:
 #line 163 "gramatica.y"
-	{ yyerror("Error sintáctico: Uso del símbolo '=' donde debe usarse ':='."); yyerrok; }
+	{ yyerror("Error: Uso del símbolo '=' donde debe usarse ':='."); yyerrok; }
 #line 1547 "y.tab.c"
 break;
 case 69:
 #line 177 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta operando en la expresión aritmética."); yyerrok; }
+	{ yyerror("Error: Falta operando en la expresión aritmética."); yyerrok; }
 #line 1552 "y.tab.c"
 break;
 case 70:
 #line 179 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta operando en la expresión aritmética."); yyerrok; }
+	{ yyerror("Error: Falta operando en la expresión aritmética."); yyerrok; }
 #line 1557 "y.tab.c"
 break;
 case 71:
 #line 181 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta operador en la expresión aritmética."); yyerrok; }
+	{ yyerror("Error: Falta operador en la expresión aritmética."); yyerrok; }
 #line 1562 "y.tab.c"
 break;
 case 75:
 #line 189 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta operando en el término de la expresión."); yyerrok; }
+	{ yyerror("Error: Falta operando en el término de la expresión."); yyerrok; }
 #line 1567 "y.tab.c"
 break;
 case 76:
 #line 191 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta operando en el término de la expresión."); yyerrok; }
+	{ yyerror("Error: Falta operando en el término de la expresión."); yyerrok; }
 #line 1572 "y.tab.c"
 break;
 case 85:
 #line 207 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
+	{ yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
 #line 1577 "y.tab.c"
 break;
 case 97:
@@ -1582,22 +1582,22 @@ case 97:
 break;
 case 99:
 #line 239 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta '(' en la condición de selección."); yyerrok; }
+	{ yyerror("Error: Falta '(' en la condición de selección."); yyerrok; }
 #line 1587 "y.tab.c"
 break;
 case 100:
 #line 241 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta ')' en la condición de selección."); yyerrok; }
+	{ yyerror("Error: Falta ')' en la condición de selección."); yyerrok; }
 #line 1592 "y.tab.c"
 break;
 case 102:
 #line 246 "gramatica.y"
-	{ yyerror("Falta de end_if."); yyerrok; }
+	{ yyerror("Error: Falta de end_if."); yyerrok; }
 #line 1597 "y.tab.c"
 break;
 case 103:
 #line 247 "gramatica.y"
-	{ yyerror("Falta de end_if."); yyerrok; }
+	{ yyerror("Error: Falta de end_if."); yyerrok; }
 #line 1602 "y.tab.c"
 break;
 case 104:
@@ -1607,32 +1607,32 @@ case 104:
 break;
 case 107:
 #line 257 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta el cuerpo en la iteración."); yyerrok; }
+	{ yyerror("Error: Falta el cuerpo en la iteración."); yyerrok; }
 #line 1612 "y.tab.c"
 break;
 case 109:
 #line 263 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta identificador (ID) en el encabezado de la iteración."); yyerrok; }
+	{ yyerror("Error: Falta identificador (ID) en el encabezado de la iteración."); yyerrok; }
 #line 1617 "y.tab.c"
 break;
 case 110:
 #line 265 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta palabra clave 'FROM' en el encabezado de la iteración."); yyerrok; }
+	{ yyerror("Error: Falta palabra clave 'FROM' en el encabezado de la iteración."); yyerrok; }
 #line 1622 "y.tab.c"
 break;
 case 111:
 #line 267 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta 'TO' o constante en el encabezado de la iteración."); yyerrok; }
+	{ yyerror("Error: Falta 'TO' o constante en el encabezado de la iteración."); yyerrok; }
 #line 1627 "y.tab.c"
 break;
 case 113:
 #line 270 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta '(' en la condición de la iteración."); yyerrok; }
+	{ yyerror("Error: Falta '(' en la condición de la iteración."); yyerrok; }
 #line 1632 "y.tab.c"
 break;
 case 114:
 #line 272 "gramatica.y"
-	{ yyerror("Error sintáctico: Falta ')' en la condición de la iteración."); yyerrok; }
+	{ yyerror("Error: Falta ')' en la condición de la iteración."); yyerrok; }
 #line 1637 "y.tab.c"
 break;
 case 125:
@@ -1647,12 +1647,12 @@ case 126:
 break;
 case 127:
 #line 303 "gramatica.y"
-	{ yyerror("Falta argumento en sentencia pout."); yyerrok; }
+	{ yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
 #line 1652 "y.tab.c"
 break;
 case 128:
 #line 305 "gramatica.y"
-	{ yyerror("Falta argumento en sentencia pout."); yyerrok; }
+	{ yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
 #line 1657 "y.tab.c"
 break;
 #line 1659 "y.tab.c"

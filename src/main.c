@@ -13,7 +13,7 @@ extern int yyparse();
 extern int yylineno;
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Error sintáctico en línea %d: %s\n", yylineno, s);
+    fprintf(stderr, "\nLínea %d: %s\n\n", yylineno, s);
 }
 
 

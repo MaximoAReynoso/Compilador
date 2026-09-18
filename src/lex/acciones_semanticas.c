@@ -101,14 +101,14 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
 
     if (valor != 0.0f) {
             if (errno == ERANGE || valor < FLT_MIN) {
-                printf("Error lexico [Línea %d]: Underflow en constante float '%s' (menor a %e)\n", yylineno, buffer, FLT_MIN);
+                printf("\nLínea %d: Error: Underflow en constante float '%s' (menor a %e)\n\n", yylineno, buffer, FLT_MIN);
                 *len = 0;
                 buffer[0] = '\0';
                 return -1;
             }
 
             if (valor > FLT_MAX) {
-                printf("Error lexico [Línea %d]: Overflow en constante float '%s' (mayor a %e)\n",
+                printf("\nLínea %d: Error: Overflow en constante float '%s' (mayor a %e)\n\n",
                        yylineno, buffer, FLT_MAX);
                 *len = 0;
                 buffer[0] = '\0';
@@ -137,7 +137,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
 
     if (errno == ERANGE) {// captura del error causado por C
         char *mensaje_error_c = strerror(errno); 
-        printf("Error lexico [Línea %d]: Fallo en '%s' -> C reporta: \"%s\"\n", yylineno, buffer, mensaje_error_c);
+        printf("\nLínea %d: Error: Fallo en '%s' -> C reporta: \"%s\"\n\n", yylineno, buffer, mensaje_error_c);
         *len = 0;
         buffer[0] = '\0';
         return -1;
@@ -145,7 +145,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
 
     // asumo que todos los valores son positivos
     if(valor > MAX_INT_CTE){ // c== 32768, asumo que es negativo
-        printf("Error lexico [Línea %d]: El valor '%ld'excede el rango de 16 bits [%d]\n", yylineno, valor,MAX_INT_CTE);
+        printf("\nLínea %d: Error: El valor '%ld'excede el rango de 16 bits [%d]\n\n", yylineno, valor,MAX_INT_CTE);
         *len = 0;
         buffer[0] = '\0';
         return -1;
@@ -329,8 +329,8 @@ int as_PR_IDENT(int c, char *buffer, int *len){
     }else {
         if (id_valido(buffer)) {
             if(strlen(buffer) > MAX_LONG_ID){
-                printf("WARNING (linea %d): El identificador (%s) supera los %d caracteres. Se trunco a '%.*s'. \n", 
-                                yylineno, buffer, MAX_LONG_ID,MAX_LONG_ID,buffer);
+                printf("\nLínea %d: Warning: El identificador %s fue truncado a: '%.*s'. \n\n", 
+                                yylineno, buffer, MAX_LONG_ID, buffer);
                 buffer[MAX_LONG_ID] = '\0'; //trunca
                 *len = MAX_LONG_ID;
                 printf("[LEX] Token emitido: ID (lexema: %s) en linea %d \n", buffer,yylineno);
