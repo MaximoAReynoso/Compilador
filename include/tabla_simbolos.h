@@ -6,7 +6,6 @@
 typedef struct Simbolo {
     char *lexema;
     int token;
-    int linea;
     struct Simbolo *siguiente;
 } Simbolo;
 
@@ -21,9 +20,12 @@ Simbolo *buscar_simbolo(TablaSimbolos *tabla, const char *lexema);
 Simbolo *insertar_simbolo(
     TablaSimbolos *tabla,
     const char *lexema,
-    int token,
-    int linea
+    int token
 );
+
+void imprimir_tabla(TablaSimbolos *tabla);
+
+void modificar_lexema(Simbolo *simbolo, const char *nuevo_lexema);
 
 void destruir_tabla(TablaSimbolos *tabla);
 

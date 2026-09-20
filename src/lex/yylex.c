@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "acciones_semanticas.h"
-#include "tokens.h"
+#include "y.tab.h"
 #include "tabla_simbolos.h"
 
 #define CANT_ESTADOS 16  //rangos de la matriz de transicion y acciones semanticas
@@ -10,7 +10,7 @@
 
 // DECLARACION DE VARIABLES
 
-int numero_linea = 1;
+int yylineno = 1;
 char buffer_lexema[1024] = "";
 int longitud_lexema = 0;
 FILE *archivo_fuente = NULL;
@@ -62,6 +62,7 @@ void init_lexer(){
     matriz_transicion[0][46] = 4;      //.
     matriz_transicion[1][46] = 4;
 
+
     matriz_transicion[0][33] = 10;      //!
     matriz_transicion[0][58] = 12;      //:
 
@@ -87,8 +88,11 @@ void init_lexer(){
     matriz_transicion[2][105] = 15;      //i
     matriz_transicion[13][95] = 13;      //_
     matriz_transicion[0][59] = 15;       //;
+    matriz_transicion[0][44] = 15;       //,
     matriz_transicion[0][40] = 15;       //(
     matriz_transicion[0][41] = 15;       //)
+    matriz_transicion[0][91] = 15;       //[
+    matriz_transicion[0][93] = 15;       //]
 
     //Mayusculas
     for (int i = 65; i <= 90; i++){
@@ -100,6 +104,7 @@ void init_lexer(){
     for (int i = 97; i <= 122; i++){
         matriz_transicion[0][i] = 13;
         matriz_transicion[13][i] = 13;
+        matriz_transicion[4][i] = 15;
     }
 
     //otros
@@ -164,8 +169,11 @@ void init_lexer(){
     matriz_acciones[2][105] = as_emit_token_INT;          //i
     matriz_acciones[13][95] = as_add_to_buffer;           //_
     matriz_acciones[0][59] = as_classify_and_emit;        //;
+    matriz_acciones[0][44] = as_classify_and_emit;        //,
     matriz_acciones[0][40] = as_classify_and_emit;        //(
     matriz_acciones[0][41] = as_classify_and_emit;        //)
+    matriz_acciones[0][91] = as_classify_and_emit;       //[
+    matriz_acciones[0][93] = as_classify_and_emit;       //]
 
         //Mayusculas
     for (int i = 65; i <= 90; i++){
@@ -177,6 +185,7 @@ void init_lexer(){
     for (int i = 97; i <= 122; i++){
         matriz_acciones[0][i] = as_add_to_buffer;
         matriz_acciones[13][i] = as_add_to_buffer;
+        matriz_acciones[4][i] = as_retract_and_emit_dot;
     }
 
         //otros
@@ -194,17 +203,15 @@ void init_lexer(){
 int yylex(){
     int c;
     int estado = 0;
+    AccionSemantica accion;
 
     while ((c = fgetc(archivo_fuente)) != EOF){
-        
-        if( c >= 128) // caracter extendido
-            c = 127; //otro
-
-        AccionSemantica accion = matriz_acciones[estado][c];
+        accion = matriz_acciones[estado][c];
         estado = matriz_transicion[estado][c];
 
+        //printf("estado: %d\n", estado);
         if(estado == -1){ //error
-            printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", numero_linea,c,c);
+            printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", yylineno,c,c);
             estado = 0;
             longitud_lexema = 0;
             buffer_lexema[0] = '\0';
@@ -218,6 +225,31 @@ int yylex(){
         }
     }
 
-    return 0; //EOF
+    if (estado != 0) {
+        if (matriz_transicion[estado][0] == 15) {
+            // Estados que finalizan por delimitador: ID / palabra reservada (13), FLOAT (5, 7), operadores (8, 11)
+            AccionSemantica accion = matriz_acciones[estado][0];
+            estado = 0;
+            if (accion != NULL) {
+                return accion(EOF, buffer_lexema, &longitud_lexema);
+            }
+        } else if (estado == 9) {
+            // Fin de archivo dentro de un comentario de una linea: se descarta
+            estado = 0;
+            longitud_lexema = 0;
+            buffer_lexema[0] = '\0';
+        } else if (estado == 3) {
+            printf("Error lexico en linea %d: cadena no cerrada antes de fin de archivo\n", yylineno);
+            estado = 0;
+            longitud_lexema = 0;
+            buffer_lexema[0] = '\0';
+        } else {
+            printf("Error lexico en linea %d: fin de archivo inesperado\n", yylineno);
+            estado = 0;
+            longitud_lexema = 0;
+            buffer_lexema[0] = '\0';
+        }
+    }
 
+    return 0; //EOF
 }

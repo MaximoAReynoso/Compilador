@@ -1,0 +1,6 @@
+test_rango
+PES_I x;
+BEGIN
+    x := 32768$i;
+    x := 32767$i;
+END;

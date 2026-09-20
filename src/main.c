@@ -1,35 +1,63 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "tokens.h"
+#include "y.tab.h"
 #include "yylex.h"
+#include "tabla_simbolos.h"
+#include "acciones_semanticas.h"
 
-extern int *yylval;
+#include "y.tab.c"
 
-int main(int argc, char* argv[]){
-    if (argc != 2){
-        if (argc < 2)
-            printf("Error - Necesita un archivo a compilar.");
-        else
-            printf("Error - Necesita un unico archivo a compilar.");
+
+extern int yyparse();
+extern int yylineno;
+
+void yyerror(const char *s) {
+    if (yychar != END) {
+        fprintf(stderr, "\nLínea %d: Error: Falta de delimitador de sentencias ejecutables END.\n\n", yylineno);
+    }
+    fprintf(stderr, "\nLínea %d: %s\n\n", yylineno, s);
+}
+
+
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        printf("Uso: %s <archivo_a_compilar>\n", argv[0]);
         return 1;
     }
 
     char* file_path = argv[1];
     FILE *file = fopen(file_path, "r");
 
-    if (file == NULL){
-        printf("Error - Archivo no encontrado.");
+    if (file == NULL) {
+        printf("Error: No se pudo abrir el archivo '%s'.\n",file_path);
         return 1;
     }
 
+    TablaSimbolos tabla;
+    inicializar_tabla(&tabla);
+    establecer_tabla_simbolos(&tabla);
+
     init_lexer();
     set_lexer_file(file);
-    //yyparse();
-    int token;
-    while ((token = yylex()) != 0) {
-        printf("Token reconocido: %d en linea %d\n", token, numero_linea);
+
+    printf("--- Iniciando Analisis sintactico ---\n");
+
+    int resultado = yyparse();
+
+    if (resultado == 0) {
+        printf("\n Compilacion exitosa: No se encontraron errores sintacticos.\n");
+    } else {
+        printf("\n Fallo el analisis sintactico.\n");
     }
 
+    printf("--- Fin de archivo ---\n\n");
+    imprimir_tabla(&tabla);
+
     fclose(file);
+    destruir_tabla(&tabla);
+
+    //yylex_destroy();
+    
     return 0;
-}
+}    

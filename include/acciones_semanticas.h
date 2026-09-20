@@ -14,9 +14,11 @@ int as_consume(int c, char *buffer, int *len);
 
 int as_consume_comment(int c, char *buffer, int *len);
 
-int as_add_to_buffer(int c, char *buffer, int *len); //Devuelve un int, pero luego en el .c no devuelve nada
+int as_add_to_buffer(int c, char *buffer, int *len);
 
 int as_retract_and_emit(int c, char *buffer, int *len);
+
+int as_retract_and_emit_dot(int c, char *buffer, int *len);
 
 int as_classify_and_emit(int c, char *buffer, int *len);
 

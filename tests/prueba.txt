@@ -1,0 +1,43 @@
+mi_programa
+
+SINGLEF x;
+SINGLEF y;
+SINGLEF z;
+
+SINGLEF FUNCTION sumar(SINGLEF a, SINGLEF b)
+BEGIN
+    RET (a + b);
+END;
+
+CLASS Persona c10
+BEGIN
+    SINGLEF edad;
+    SINGLEF altura;
+END;
+
+Persona p1;
+
+BEGIN
+    x := 25$i;
+    y := 10$i;
+    
+    p1.edad := -30$i;
+    p1[0$i] := 31$i;
+    
+    z := TOSF(x + y);
+    
+    x := sumar(x=1$i, y+2$i) [2$i, 1$i];
+    
+    IF (x >= 10$i)
+        BEGIN
+            POUT("Hola mundo");
+            pout(x + y);
+        END
+    ELSE
+        BEGIN
+            pout("Error");
+        END
+    END_IF;
+    
+
+END;

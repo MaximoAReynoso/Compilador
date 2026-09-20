@@ -1,8 +1,7 @@
 #include "tabla_simbolos.h"
 #include <stdlib.h>
 #include <string.h>
-
-static unsigned hash(const char *lexema);
+#include <stdio.h>
 
 static unsigned hash(const char *lexema) {
     unsigned hash_value = 0;
@@ -36,7 +35,7 @@ Simbolo *buscar_simbolo(TablaSimbolos *tabla, const char *lexema){
 
 }
 
-Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token, int linea) {
+Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token) {
 
     Simbolo *existe = buscar_simbolo(tabla, lexema);
     if (existe != NULL) {
@@ -57,11 +56,21 @@ Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token, i
 
     strcpy(nuevo_simbolo->lexema, lexema);
     nuevo_simbolo->token = token;
-    nuevo_simbolo->linea = linea;
     nuevo_simbolo->siguiente = tabla->entradas[index];
     tabla->entradas[index] = nuevo_simbolo;
 
     return nuevo_simbolo;
+}
+
+void modificar_lexema(Simbolo *simbolo, const char *nuevo_lexema) {
+    if (simbolo == NULL || nuevo_lexema == NULL) return;
+    
+    char *nuevo = malloc(strlen(nuevo_lexema) + 1);
+    if (nuevo == NULL) return;
+    
+    strcpy(nuevo, nuevo_lexema);
+    free(simbolo->lexema);
+    simbolo->lexema = nuevo;
 }
 
 void destruir_tabla(TablaSimbolos *tabla) {
@@ -72,6 +81,18 @@ void destruir_tabla(TablaSimbolos *tabla) {
             actual = actual->siguiente;
             free(temp->lexema);
             free(temp);
+        }
+    }
+}
+
+void imprimir_tabla(TablaSimbolos *tabla){
+    printf("Tabla de Simbolos:\n");
+    for (int i = 0; i < TAM_TABLA; i++){
+        Simbolo *actual = tabla->entradas[i];
+        while (actual != NULL) {
+            Simbolo *temp = actual;
+            printf("Token: %i, Lexema: %s\n",temp->token, temp->lexema);
+            actual = actual->siguiente;
         }
     }
 }
