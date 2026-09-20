@@ -1,0 +1,4 @@
+demo
+begin
+    from x = to 2$i by 1$i begin end repeat;
+end;

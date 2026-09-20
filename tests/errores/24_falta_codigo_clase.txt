@@ -1,0 +1,4 @@
+demo
+class foo 1$i begin end;
+begin
+end;

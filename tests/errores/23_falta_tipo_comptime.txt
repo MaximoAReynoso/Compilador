@@ -1,0 +1,4 @@
+demo
+comptime x;
+begin
+end;

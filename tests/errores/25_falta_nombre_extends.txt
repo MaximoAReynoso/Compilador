@@ -1,0 +1,4 @@
+demo
+class foo extends begin end;
+begin
+end;

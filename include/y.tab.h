@@ -28,7 +28,6 @@
 #define COMPTIME 281
 #define TOSF 282
 #define EXTENDS 283
-#define LOWER_THAN_ELSE 284
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

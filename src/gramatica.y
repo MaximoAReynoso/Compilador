@@ -21,21 +21,21 @@ void yyerror(const char *s);
 %token IF ELSE END_IF BEGIN END POUT RET CLASS FUNCTION SINGLEF
 %token FROM TO BY REPEAT COMPTIME TOSF EXTENDS
 
-%nonassoc LOWER_THAN_ELSE
-%nonassoc ELSE
-
 %%
 
 programa:
-    ID { printf("[SINT] Estructura Programa, en línea %d\n", yylineno); } bloque_declarativo bloque_ejecutable ';'
-    { printf("Sintaxis correcta: Programa reconocido con éxito.\n"); }
+    ID bloque_declarativo bloque_ejecutable ';'
+    { 
+        printf("[SINT] Estructura Programa, en línea %d\n", yylineno);
+        printf("Sintaxis correcta: Programa reconocido con éxito.\n"); 
+    }
   | error bloque_declarativo bloque_ejecutable ';'
     { yyerror("Error: Falta el nombre del programa al inicio."); yyerrok; }
 ;
 
 bloque_declarativo:
     lista_declaraciones
-  | 
+  |
 ;
 
 lista_declaraciones:
@@ -64,27 +64,32 @@ tipo_dato:
 
 declaracion_variable:
     tipo_dato lista_variables
+    { printf("[SINT] Estructura Variable, en línea %d\n", yylineno); }
 ;
 
 lista_variables:
     lista_variables ',' ID
-  | ID { printf("[SINT] Estructura Variable, en línea %d\n", yylineno); }
+  | ID
 ;
 
 declaracion_objeto:
-    ID { printf("[SINT] Estructura Objeto, en línea %d\n", yylineno); } lista_variables
+    ID lista_variables
+    { printf("[SINT] Estructura Objeto, en línea %d\n", yylineno); }
 ;
 
 declaracion_funcion:
-    tipo_dato FUNCTION ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } bloque_declarativo bloque_ejecutable
-  | tipo_dato ID '(' lista_parametros ')' { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); } bloque_ejecutable
+    tipo_dato FUNCTION ID '(' lista_parametros ')' bloque_declarativo bloque_ejecutable
+    { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); }
+  | tipo_dato ID '(' lista_parametros ')' bloque_ejecutable
+    { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); }
   | tipo_dato FUNCTION error '(' lista_parametros ')' bloque_declarativo bloque_ejecutable
     { yyerror("Error: Falta el nombre (identificador) de la función."); yyerrok; }
 ;
 
 lista_parametros:
     lista_parametros ',' parametro
-  | lista_parametros error parametro { yyerror("Error: Falta de “,” en declaración de variables."); yyerrok; }
+  | lista_parametros error parametro 
+    { yyerror("Error: Falta de “,” en declaración de variables."); yyerrok; }
   | parametro
 ;
 
@@ -97,18 +102,19 @@ parametro:
 ;
 
 declaracion_clase:
-    CLASS ID { printf("[SINT] Estructura CLASS, en línea %d\n", yylineno); } codigo_clase encabezado_clase miembros_clase END
+    CLASS ID codigo_clase encabezado_clase miembros_clase END
+    { printf("[SINT] Estructura CLASS, en línea %d\n", yylineno); }
   | CLASS ID error encabezado_clase miembros_clase END
     { yyerror("Error: Ausencia del código en la declaración de la clase."); yyerrok; }
 ;
 
 codigo_clase:
     ID
-  | 
+  |
 ;
 
 lista_clase:
-  lista_clase ',' ID
+    lista_clase ',' ID
   | ID
 ;
 
@@ -116,7 +122,7 @@ encabezado_clase:
     BEGIN
   | EXTENDS lista_clase BEGIN
   | EXTENDS BEGIN
-  { yyerror("Error: Ausencia de nombre o lista de clases después de extends."); yyerrok; }
+    { yyerror("Error: Ausencia de nombre o lista de clases después de extends."); yyerrok; }
 ;
 
 miembros_clase:
@@ -130,12 +136,9 @@ miembro:
 ;
 
 bloque_ejecutable:
-    BEGIN lista_ejecutables bloque_END
-  | error lista_ejecutables bloque_END { yyerror("Error: Falta de delimitador de sentencias ejecutables BEGIN."); yyerrok; }
-;
-
-bloque_END:
-  END
+    BEGIN lista_ejecutables END
+  | error lista_ejecutables END 
+    { yyerror("Error: Falta de delimitador de sentencias ejecutables BEGIN."); yyerrok; }
 ;
 
 lista_ejecutables:
@@ -159,11 +162,12 @@ sentencia_retorno:
     RET '(' expresion_aritmetica ')'
     { printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
   | RET '(' ')'
-  { printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
+    { printf("[SINT] Estructura RET, en línea %d\n", yylineno); }
 ;
 
 asignacion:
-    destino ASSIGN { printf("[SINT] Estructura ASSIGN, en línea %d\n", yylineno); } expresion_aritmetica
+    destino ASSIGN expresion_aritmetica
+    { printf("[SINT] Estructura ASSIGN, en línea %d\n", yylineno); }
   | destino '=' expresion_aritmetica
     { yyerror("Error: Uso del símbolo '=' donde debe usarse ':='."); yyerrok; }
 ;
@@ -174,26 +178,27 @@ destino:
   | ID '[' expresion_aritmetica ']'
 ;
 
+impresion:
+    POUT '(' expresion_aritmetica ')'
+    { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
+  | POUT '(' MULT_STRING ')'
+    { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
+  | POUT '(' ')'
+    { yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
+  | POUT error
+    { yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
+;
+
 expresion_aritmetica:
     expresion_aritmetica '+' termino
   | expresion_aritmetica '-' termino
   | termino
-  | expresion_aritmetica '+' error
-    { yyerror("Error: Falta operando en la expresión aritmética."); yyerrok; }
-  | expresion_aritmetica '-' error
-    { yyerror("Error: Falta operando en la expresión aritmética."); yyerrok; }
-  | expresion_aritmetica termino
-    { yyerror("Error: Falta operador en la expresión aritmética."); yyerrok; }
 ;
 
 termino:
     termino '*' operando
   | termino '/' operando
   | operando
-  | termino '*' error
-    { yyerror("Error: Falta operando en el término de la expresión."); yyerrok; }
-  | termino '/' error
-    { yyerror("Error: Falta operando en el término de la expresión."); yyerrok; }
 ;
 
 operando:
@@ -210,7 +215,7 @@ orden_evaluacion:
     '[' lista_enteros ']'
   | '[' error ']'
     { yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
-  | 
+  |
 ;
 
 lista_enteros:
@@ -220,7 +225,7 @@ lista_enteros:
 
 parametros_reales:
     lista_parametros_reales
-  | 
+  |
 ;
 
 lista_parametros_reales:
@@ -299,7 +304,8 @@ constante_con_signo:
 ;
 
 if_sentencia:
-    IF '(' condicion ')' { printf("[SINT] Estructura IF, en línea %d\n", yylineno); } bloque_o_sentencia fin_if  
+    IF '(' condicion ')' bloque_o_sentencia fin_if
+    { printf("[SINT] Estructura IF, en línea %d\n", yylineno); }
   | IF error condicion ')' bloque_o_sentencia fin_if
     { yyerror("Error: Falta '(' en la condición de selección."); yyerrok; }
   | IF '(' condicion error bloque_o_sentencia fin_if
@@ -307,30 +313,33 @@ if_sentencia:
 ;
 
 fin_if:
-  rama_else END_IF
-  | rama_else error { yyerror("Error: Falta de end_if."); yyerrok; }
-  | error { yyerror("Error: Falta de end_if."); yyerrok; }
+    rama_else END_IF
+  | rama_else error
+    { yyerror("Error: Falta 'END_IF' al cerrar la estructura IF."); yyerrok; }
 ;
 
 rama_else:
-    ELSE { printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); } bloque_o_sentencia
+    ELSE bloque_o_sentencia
+    { printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); }
+  |
 ;
 
 iteracion:
     encabezado_iteracion cuerpo_iteracion REPEAT
+    { printf("[SINT] Estructura ITERACION, en línea %d\n", yylineno); }
   | encabezado_iteracion error REPEAT
-    { yyerror("Error: Falta el cuerpo en la iteración."); yyerrok; }
+    { yyerror("Error: Falta o hay un error en el cuerpo de la iteración."); yyerrok; }
 ;
 
 encabezado_iteracion:
     FROM ID '=' constante_con_signo TO constante_con_signo BY constante_con_signo
+  | FROM '(' condicion ')'
   | FROM error '=' constante_con_signo TO constante_con_signo BY constante_con_signo
     { yyerror("Error: Falta identificador (ID) en el encabezado de la iteración."); yyerrok; }
   | destino '=' constante_con_signo TO constante_con_signo BY constante_con_signo
     { yyerror("Error: Falta palabra clave 'FROM' en el encabezado de la iteración."); yyerrok; }
   | FROM ID '=' constante_con_signo constante_con_signo BY constante_con_signo
     { yyerror("Error: Falta 'TO' o constante en el encabezado de la iteración."); yyerrok; }
-  | FROM '(' condicion ')'
   | FROM error condicion ')'
     { yyerror("Error: Falta '(' en la condición de la iteración."); yyerrok; }
   | FROM '(' condicion error
@@ -342,7 +351,7 @@ cuerpo_iteracion:
 ;
 
 bloque_o_sentencia:
-  bloque_ejecutable
+    bloque_ejecutable
   | sentencia
 ;
 
@@ -359,15 +368,11 @@ operador_relacional:
   | NE
 ;
 
-impresion:
-    POUT '(' expresion_aritmetica ')'
-    { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
-  | POUT '(' MULT_STRING ')'
-    { printf("[SINT] Estructura POUT, en línea %d\n", yylineno); }
-  | POUT '(' ')'
-    { yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
-  | POUT error
-    { yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
-;
-
 %%
+
+void yyerror(const char *s) {
+    if (yychar != END) {
+        fprintf(stderr, "\nLínea %d: Error: Falta de delimitador de sentencias ejecutables END.\n\n", yylineno);
+    }
+    fprintf(stderr, "\nLínea %d: %s\n\n", yylineno, s);
+}

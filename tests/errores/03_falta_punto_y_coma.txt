@@ -1,0 +1,4 @@
+demo
+begin
+    x := 1$i
+end;

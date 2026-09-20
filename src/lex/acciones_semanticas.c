@@ -61,7 +61,7 @@ int as_retract_and_emit(int c, char *buffer, int *len) {
 
     *len = 0;
     buffer[0] = '\0';
-    printf("[LEX] Token emitido: '%c' (ascii: %d) en línea %d\n", caracter, caracter, yylineno);
+    //printf("[LEX] Token emitido: '%c' (ascii: %d) en línea %d\n", caracter, caracter, yylineno);
     return caracter;
 }
 
@@ -70,7 +70,7 @@ int as_retract_and_emit_dot(int c, char *buffer, int *len) {
     if (c != EOF) {
         ungetc(c, archivo_fuente);
     }
-     printf("[LEX] Token emitido: '.' en línea %d\n", yylineno);
+    //printf("[LEX] Token emitido: '.' en línea %d\n", yylineno);
     *len = 0;
     buffer[0] = '\0';
     return '.';
@@ -78,7 +78,7 @@ int as_retract_and_emit_dot(int c, char *buffer, int *len) {
 
 int as_classify_and_emit(int c, char *buffer, int *len){
     yylval.simbolo = NULL;
-    printf("[LEX] Token emitido: '%c' (ascii: %d) en línea %d\n", c, c, yylineno);
+    //printf("[LEX] Token emitido: '%c' (ascii: %d) en línea %d\n", c, c, yylineno);
     return c;
 }
 
@@ -121,7 +121,7 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
     }
     yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT);
     
-    printf("[LEX] Token emitido: CTE_FLOAT (lexema: '%s') en línea %d\n", buffer, yylineno);
+    //printf("[LEX] Token emitido: CTE_FLOAT (lexema: '%s') en línea %d\n", buffer, yylineno);
     *len = 0;
     buffer[0] = '\0';
     return CTE_FLOAT;
@@ -155,7 +155,7 @@ int as_emit_token_INT(int c, char *buffer, int *len){
     (*len)++;
     buffer[*len] = '\0';
     yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE);
-    printf("[LEX] Token emitido: %s en línea %d\n", buffer, yylineno);
+    //printf("[LEX] Token emitido: CTE (lexema: %s) en línea %d\n", buffer, yylineno);
     *len = 0;
     buffer[0] = '\0';
     return CTE;
@@ -165,13 +165,13 @@ int as_emit_token_ASIG(int c, char *buffer, int *len){
     yylval.simbolo = NULL;
     *len = 0;
     buffer[0] = '\0';
-    printf("[LEX] Token emitido: ASSIGN (:=) en línea %d\n", yylineno);
+    //printf("[LEX] Token emitido: ASSIGN (:=) en línea %d\n", yylineno);
     return ASSIGN;
 }
 
 int as_emit_token_NEQ(int c, char *buffer, int *len){
     yylval.simbolo = NULL;
-    printf("[LEX] Token emitido: NE (!=) en línea %d\n", yylineno);
+    //printf("[LEX] Token emitido: NE (!=) en línea %d\n", yylineno);
     *len = 0;
     buffer[0] = '\0';
     return NE;
@@ -192,7 +192,7 @@ int as_emit_token_comp(int c, char *buffer, int *len){
         value = GE;
         nombre_tok = "GE (>=)";
     }
-    printf("[LEX] Token emitido: %s en línea %d\n", nombre_tok, yylineno);
+    //printf("[LEX] Token emitido: %s en línea %d\n", nombre_tok, yylineno);
     *len = 0;
     buffer[0] = '\0';
     return value;
@@ -210,7 +210,7 @@ int as_emit_token_string(int c, char *buffer, int *len){
     *len = j;
 
     yylval.simbolo = insertar_simbolo(tabla_actual, buffer, MULT_STRING);
-    printf("[LEX] Token emitido: MULT_STRING (lexema: %s) en línea %d\n", buffer, yylineno);
+    //printf("[LEX] Token emitido: MULT_STRING (lexema: %s) en línea %d\n", buffer, yylineno);
     *len = 0;
     buffer[0] = '\0';
     return MULT_STRING;
@@ -247,85 +247,95 @@ int as_PR_IDENT(int c, char *buffer, int *len){
 
     yylval.simbolo = NULL;
     if (strcmp(cadena, "if") == 0) {
-        printf("[LEX] Token emitido: if (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: IF (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return IF;
     } else if (strcmp(cadena, "else") == 0) {
-        printf("[LEX] Token emitido: else (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: ELSE (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return ELSE;
     } else if (strcmp(cadena, "end_if") == 0) {
-        printf("[LEX] Token emitido: end_if (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: END_IF (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return END_IF;
     } else if (strcmp(cadena, "begin") == 0) {
-        printf("[LEX] Token emitido: begin (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: BEGIN (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return BEGIN;
     } else if (strcmp(cadena, "end") == 0) {
-        printf("[LEX] Token emitido: end (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: END (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return END;
     } else if (strcmp(cadena, "pout") == 0) {
-        printf("[LEX] Token emitido: pout (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: POUT (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return POUT;
     } else if (strcmp(cadena, "ret") == 0) {
-        printf("[LEX] Token emitido: ret (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: RET (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return RET;
     } else if (strcmp(cadena, "class") == 0) {
-        printf("[LEX] Token emitido: class (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: CLASS (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return CLASS;
     } else if (strcmp(cadena, "function") == 0) {
-        printf("[LEX] Token emitido: function (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: FUNCTION (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return FUNCTION;
     } else if (strcmp(cadena, "from") == 0) {
-        printf("[LEX] Token emitido: from (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: FROM (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return FROM;
     } else if (strcmp(cadena, "to") == 0) {
-        printf("[LEX] Token emitido: to (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: TO (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return TO;
     } else if (strcmp(cadena, "by") == 0) {
-        printf("[LEX] Token emitido: by (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: BY (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return BY;
     } else if (strcmp(cadena, "repeat") == 0) {
-        printf("[LEX] Token emitido: repeat (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: REPEAT (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return REPEAT;
     } else if (strcmp(cadena, "comptime") == 0) {
-        printf("[LEX] Token emitido: compite (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: COMPTIME (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return COMPTIME;
     } else if (strcmp(cadena, "tosf") == 0) {
-        printf("[LEX] Token emitido: tosf (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: TOSF (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
         return TOSF;
     } else if(strcmp(cadena,"singlef") == 0){
-        printf("[LEX] Token emitido: singlef (lexema: %s) en linea %d \n", buffer,yylineno);
+        //printf("[LEX] Token emitido: SINGLEF (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
-        return SINGLEF; 
+        return SINGLEF;
+    } else if(strcmp(cadena,"pes_i") == 0){
+        //printf("[LEX] Token emitido: PES_I (lexema: %s) en linea %d \n", buffer,yylineno);
+        *len = 0;
+        buffer[0] = '\0';
+        return PES_I;
+    } else if(strcmp(cadena,"extends") == 0){
+        //printf("[LEX] Token emitido: EXTENDS (lexema: %s) en linea %d \n", buffer,yylineno);
+        *len = 0;
+        buffer[0] = '\0';
+        return EXTENDS;
     }else {
         if (id_valido(buffer)) {
             if(strlen(buffer) > MAX_LONG_ID){
@@ -335,7 +345,7 @@ int as_PR_IDENT(int c, char *buffer, int *len){
                 *len = MAX_LONG_ID;
             }
             yylval.simbolo = insertar_simbolo(tabla_actual, buffer, ID);
-            printf("[LEX] Token emitido: ID (lexema: %s) en linea %d \n", buffer,yylineno);
+            //printf("[LEX] Token emitido: ID (lexema: %s) en linea %d \n", buffer,yylineno);
             *len = 0;
             buffer[0] = '\0';
             return ID;
