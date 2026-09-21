@@ -1,4 +1,5 @@
 demo
 class foo 1$i begin end;
 begin
+    x := 10$i;
 end;

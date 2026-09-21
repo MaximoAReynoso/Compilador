@@ -1,8 +1,8 @@
 demo
 begin
-    from x = to 2$i by 1$i 
+    if 1$i < 2$i) 
         begin
             x := 10$i;
         end 
-    repeat;
+    end_if;
 end;

@@ -1,4 +1,5 @@
 demo
 comptime x;
 begin
+    x := 10$i;
 end;

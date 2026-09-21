@@ -1,4 +1,5 @@
 demo
 class foo extends begin end;
 begin
+    x = 10$i;
 end;

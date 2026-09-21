@@ -6,8 +6,6 @@
 #include "tabla_simbolos.h"
 #include "acciones_semanticas.h"
 
-#include "y.tab.c"
-
 
 extern int yyparse();
 extern int yylineno;
@@ -37,11 +35,11 @@ int main(int argc, char* argv[]) {
 
     int resultado = yyparse();
   
-    if (resultado == 0) {
+    /*if (resultado == 0) {
         printf("Compilación exitosa: No se encontraron errores sintácticos.\n");
     } else {
         printf("\n Fallo el analisis sintactico.\n");
-    }
+    }*/
 
     printf("--- Fin de archivo ---\n\n");
     imprimir_tabla(&tabla);

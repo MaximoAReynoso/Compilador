@@ -1,3 +1,4 @@
 demo
 x := 1$i;
+x := x + 3$i;
 end;

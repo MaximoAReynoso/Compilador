@@ -1,4 +1,5 @@
 demo
 pes_i function f(x) begin end;
 begin
+    x := 10$i;
 end;

@@ -6,7 +6,6 @@
 
 extern int yylex(void);
 extern int yylineno;
-int cant_errores = 0;
 void yyerror(const char *s);
 %}
 
@@ -27,12 +26,8 @@ void yyerror(const char *s);
 programa:
     ID bloque_declarativo bloque_ejecutable ';'
     { 
-        if (cant_errores == 0) {
-            printf("[SINT] Estructura Programa, en línea %d\n", yylineno);
-            printf("Sintaxis correcta: Programa reconocido con éxito.\n"); 
-        } else {
-            printf("Sintaxis incorrecta: finalizado con %d error(es).\n", cant_errores);
-        }
+        printf("[SINT] Estructura Programa, en línea %d\n", yylineno);
+        printf("Sintaxis correcta: Programa reconocido con éxito.\n"); 
     }
   | error bloque_declarativo bloque_ejecutable ';'
     { yyerror("Error: Falta el nombre del programa al inicio."); yyerrok; }
@@ -93,16 +88,17 @@ declaracion_funcion:
 
 lista_parametros:
     lista_parametros ',' parametro
-  | lista_parametros parametro /* El parser ve dos seguidos sin coma */
-    { yyerror("Error: Falta de ',' en declaración de parámetros."); yyerrok; }
+  | lista_parametros error parametro 
+    { yyerror("Error: Falta de “,” en declaración de variables."); yyerrok; }
   | parametro
 ;
 
 parametro:
     tipo_dato ID
-  | tipo_dato /* El parser ve el tipo pero se topa con otra cosa en lugar del ID */
+  | tipo_dato error
     { yyerror("Error: Falta el nombre del parámetro formal en la función."); yyerrok; }
-  /* Omitimos la regla "error ID" (falta de tipo) porque empezar una regla genérica con ID genera conflictos severos con otras declaraciones. */
+  | error ID
+    { yyerror("Error: Falta el tipo del parámetro formal en la función."); yyerrok; }
 ;
 
 declaracion_clase:
@@ -149,9 +145,9 @@ lista_ejecutables:
     lista_ejecutables sentencia ';'
   | sentencia ';'
   | lista_ejecutables error ';'
-    { yyerror("Error: Sentencia mal formada. Se omitió hasta el ';'."); yyerrok; }
+    { yyerror("Error: Falta ';' al final de la sentencia o error en sentencia."); yyerrok; }
   | error ';'
-    { yyerror("Error: Sentencia mal formada. Se omitió hasta el ';'."); yyerrok; }
+    { yyerror("Error: Falta ';' al final de la sentencia."); yyerrok; }
 ;
 
 sentencia:
@@ -196,20 +192,12 @@ impresion:
 expresion_aritmetica:
     expresion_aritmetica '+' termino
   | expresion_aritmetica '-' termino
-  | expresion_aritmetica '+' error 
-    { yyerror("Error: Falta operando en la expresión después de '+'."); yyerrok; }
-  | expresion_aritmetica '-' error 
-    { yyerror("Error: Falta operando en la expresión después de '-'."); yyerrok; }
   | termino
 ;
 
 termino:
     termino '*' operando
   | termino '/' operando
-  | termino '*' error 
-    { yyerror("Error: Falta operando en la expresión después de '*'."); yyerrok; }
-  | termino '/' error 
-    { yyerror("Error: Falta operando en la expresión después de '/'."); yyerrok; }
   | operando
 ;
 
@@ -318,18 +306,22 @@ constante_con_signo:
 if_sentencia:
     IF '(' condicion ')' bloque_o_sentencia fin_if
     { printf("[SINT] Estructura IF, en línea %d\n", yylineno); }
-  | IF condicion ')' bloque_o_sentencia fin_if
+  | IF error condicion ')' bloque_o_sentencia fin_if
     { yyerror("Error: Falta '(' en la condición de selección."); yyerrok; }
-  | IF '(' condicion bloque_o_sentencia fin_if
+  | IF '(' condicion error bloque_o_sentencia fin_if
     { yyerror("Error: Falta ')' en la condición de selección."); yyerrok; }
-  | IF '(' condicion ')' bloque_o_sentencia error
-    { yyerror("Error: Estructura IF mal cerrada (posiblemente falta END_IF o el delimitador ';')."); yyerrok; }
 ;
 
 fin_if:
-    ELSE bloque_o_sentencia END_IF
+    rama_else END_IF
+  | rama_else error
+    { yyerror("Error: Falta 'END_IF' al cerrar la estructura IF."); yyerrok; }
+;
+
+rama_else:
+    ELSE bloque_o_sentencia
     { printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); }
-  | END_IF
+  |
 ;
 
 iteracion:
@@ -342,16 +334,17 @@ iteracion:
 encabezado_iteracion:
     FROM ID '=' constante_con_signo TO constante_con_signo BY constante_con_signo
   | FROM '(' condicion ')'
-  | FROM '=' constante_con_signo TO constante_con_signo BY constante_con_signo
-    { yyerror("Error: Falta identificador (ID) en el encabezado."); yyerrok; }
+  | FROM error '=' constante_con_signo TO constante_con_signo BY constante_con_signo
+    { yyerror("Error: Falta identificador (ID) en el encabezado de la iteración."); yyerrok; }
+  | destino '=' constante_con_signo TO constante_con_signo BY constante_con_signo
+    { yyerror("Error: Falta palabra clave 'FROM' en el encabezado de la iteración."); yyerrok; }
   | FROM ID '=' constante_con_signo constante_con_signo BY constante_con_signo
-    { yyerror("Error: Falta 'TO' en el encabezado de la iteración."); yyerrok; }
-  | FROM condicion ')'
+    { yyerror("Error: Falta 'TO' o constante en el encabezado de la iteración."); yyerrok; }
+  | FROM error condicion ')'
     { yyerror("Error: Falta '(' en la condición de la iteración."); yyerrok; }
-  | FROM '(' condicion
+  | FROM '(' condicion error
     { yyerror("Error: Falta ')' en la condición de la iteración."); yyerrok; }
 ;
-/* Si falta el FROM, la gramática simplemente fallará y saltará al error general de bloque, lo cual es correcto y evita conflictos. */
 
 cuerpo_iteracion:
     bloque_o_sentencia
@@ -378,24 +371,10 @@ operador_relacional:
 %%
 
 void yyerror(const char *s) {
-    const char *COLOR_ROJO = "\033[1;31m";
-    const char *COLOR_AMARILLO = "\033[1;33m";
-    const char *COLOR_RESET = "\033[0m";
+  if (strcmp(s, "syntax error") == 0) {
+    fprintf(stderr, "\nLínea %d: Error sintáctico en la entrada.\n", yylineno);
+    return;
+  }
 
-    if (strncmp(s, "syntax error", 12) == 0) {
-        return; 
-    }
-
-    if (strstr(s, "Sentencia mal formada") != NULL) {
-        cant_errores++; /* Sumamos error */
-        fprintf(stderr, "%s[ERROR DE SINTAXIS]%s %sLínea %d:%s Sentencia inválida. Es posible que falte un delimitador estructural (como 'END_IF' o ';') o un operador.\n", 
-                COLOR_ROJO, COLOR_RESET, COLOR_AMARILLO, yylineno, COLOR_RESET);
-        return;
-    }
-
-    cant_errores++; /* Sumamos error para cualquier regla de error personalizada */
-    const char *mensaje = (strncmp(s, "Error: ", 7) == 0) ? s + 7 : s;
-    
-    fprintf(stderr, "%s[ERROR DE SINTAXIS]%s %sLínea %d:%s %s\n", 
-            COLOR_ROJO, COLOR_RESET, COLOR_AMARILLO, yylineno, COLOR_RESET, mensaje);
+  fprintf(stderr, "\nLínea %d: %s\n", yylineno, s);
 }

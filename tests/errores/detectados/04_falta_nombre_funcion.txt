@@ -1,0 +1,8 @@
+demo
+pes_i function (pes_i x) 
+begin 
+    x := 1$i; 
+end;
+begin
+    x := 2$i;
+end;

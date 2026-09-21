@@ -1,0 +1,7 @@
+demo
+pes_i function f(pes_i x pes_i y) 
+    begin 
+    end;
+begin
+    x := 2$i;
+end;
