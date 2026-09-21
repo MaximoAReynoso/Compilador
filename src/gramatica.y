@@ -26,7 +26,7 @@ void yyerror(const char *s);
 
 programa:
     ID bloque_declarativo bloque_ejecutable ';'
-    { 
+    {
         if (cant_errores == 0) {
             printf("[SINT] Estructura Programa, en línea %d\n", yylineno);
             printf("Sintaxis correcta: Programa reconocido con éxito.\n"); 
@@ -34,7 +34,9 @@ programa:
             printf("Sintaxis incorrecta: finalizado con %d error(es).\n", cant_errores);
         }
     }
-  | error bloque_declarativo bloque_ejecutable ';'
+  | ID bloque_declarativo BEGIN lista_ejecutables
+    { yyerror("Error: Falta el delimitador END al final del bloque ejecutable."); yyerrok; }
+  | bloque_declarativo bloque_ejecutable ';'
     { yyerror("Error: Falta el nombre del programa al inicio."); yyerrok; }
 ;
 
@@ -93,28 +95,25 @@ declaracion_funcion:
 
 lista_parametros:
     lista_parametros ',' parametro
-  | lista_parametros parametro /* El parser ve dos seguidos sin coma */
+  | lista_parametros parametro
     { yyerror("Error: Falta de ',' en declaración de parámetros."); yyerrok; }
   | parametro
 ;
 
 parametro:
     tipo_dato ID
-  | tipo_dato /* El parser ve el tipo pero se topa con otra cosa en lugar del ID */
+  | tipo_dato
     { yyerror("Error: Falta el nombre del parámetro formal en la función."); yyerrok; }
-  /* Omitimos la regla "error ID" (falta de tipo) porque empezar una regla genérica con ID genera conflictos severos con otras declaraciones. */
 ;
 
 declaracion_clase:
     CLASS ID codigo_clase encabezado_clase miembros_clase END
     { printf("[SINT] Estructura CLASS, en línea %d\n", yylineno); }
-  | CLASS ID error encabezado_clase miembros_clase END
-    { yyerror("Error: Ausencia del código en la declaración de la clase."); yyerrok; }
 ;
 
 codigo_clase:
     ID
-  |
+  | { yyerror("Error: Ausencia del código en la declaración de la clase."); yyerrok; }
 ;
 
 lista_clase:
@@ -344,14 +343,15 @@ encabezado_iteracion:
   | FROM '(' condicion ')'
   | FROM '=' constante_con_signo TO constante_con_signo BY constante_con_signo
     { yyerror("Error: Falta identificador (ID) en el encabezado."); yyerrok; }
-  | FROM ID '=' constante_con_signo constante_con_signo BY constante_con_signo
+  | FROM ID '=' constante_con_signo constante_con_signo
     { yyerror("Error: Falta 'TO' en el encabezado de la iteración."); yyerrok; }
   | FROM condicion ')'
     { yyerror("Error: Falta '(' en la condición de la iteración."); yyerrok; }
   | FROM '(' condicion
     { yyerror("Error: Falta ')' en la condición de la iteración."); yyerrok; }
+  | FROM ID '=' TO
+    { yyerror("Error: Falta CTE en el encabezado."); yyerrok; }
 ;
-/* Si falta el FROM, la gramática simplemente fallará y saltará al error general de bloque, lo cual es correcto y evita conflictos. */
 
 cuerpo_iteracion:
     bloque_o_sentencia
@@ -387,13 +387,13 @@ void yyerror(const char *s) {
     }
 
     if (strstr(s, "Sentencia mal formada") != NULL) {
-        cant_errores++; /* Sumamos error */
+        cant_errores++; 
         fprintf(stderr, "%s[ERROR DE SINTAXIS]%s %sLínea %d:%s Sentencia inválida. Es posible que falte un delimitador estructural (como 'END_IF' o ';') o un operador.\n", 
                 COLOR_ROJO, COLOR_RESET, COLOR_AMARILLO, yylineno, COLOR_RESET);
         return;
     }
 
-    cant_errores++; /* Sumamos error para cualquier regla de error personalizada */
+    cant_errores++;
     const char *mensaje = (strncmp(s, "Error: ", 7) == 0) ? s + 7 : s;
     
     fprintf(stderr, "%s[ERROR DE SINTAXIS]%s %sLínea %d:%s %s\n", 

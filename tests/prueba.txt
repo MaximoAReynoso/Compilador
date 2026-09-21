@@ -1,6 +1,0 @@
-pepito
-PES_I x;
-BEGIN
-    x := 10$i;
-    POUT(x);
-END;

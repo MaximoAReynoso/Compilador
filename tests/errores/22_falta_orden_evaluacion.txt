@@ -1,4 +1,0 @@
-demo
-begin
-    f(1$i) [];
-end;

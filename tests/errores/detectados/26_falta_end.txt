@@ -1,3 +1,4 @@
 demo
+    PES_I x;
 begin
     x := 1$i;

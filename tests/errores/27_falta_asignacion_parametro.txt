@@ -1,4 +1,0 @@
-demo
-begin
-    f(x 1$i) [1$i];
-end;

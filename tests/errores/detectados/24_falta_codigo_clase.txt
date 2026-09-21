@@ -1,5 +1,5 @@
 demo
-class foo 1$i begin end;
+class foo begin end;
 begin
     x := 10$i;
 end;

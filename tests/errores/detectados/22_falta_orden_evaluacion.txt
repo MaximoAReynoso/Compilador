@@ -1,0 +1,8 @@
+demo
+    PES_I function f (PES_I x1, PES_I x2)
+    begin
+        x2 := x1;
+    end;
+begin
+    z := f(a,b) [1$i, ];
+end;
