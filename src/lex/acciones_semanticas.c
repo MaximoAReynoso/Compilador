@@ -326,11 +326,11 @@ int as_PR_IDENT(int c, char *buffer, int *len){
         *len = 0;
         buffer[0] = '\0';
         return SINGLEF;
-    } else if(strcmp(cadena,"pes_i") == 0){
-        printf("[LEX] Token emitido: PES_I (lexema: %s) en linea %d \n", buffer,yylineno);
+    } else if(strcmp(cadena,"integer") == 0){
+        printf("[LEX] Token emitido: INTEGER (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;
         buffer[0] = '\0';
-        return PES_I;
+        return INTEGER;
     } else if(strcmp(cadena,"extends") == 0){
         printf("[LEX] Token emitido: EXTENDS (lexema: %s) en linea %d \n", buffer,yylineno);
         *len = 0;

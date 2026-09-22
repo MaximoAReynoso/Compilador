@@ -1,5 +1,5 @@
 demo
-pes_i function (pes_i x) 
+INTEGER function (INTEGER x) 
 begin 
     x := 1$i; 
 end;

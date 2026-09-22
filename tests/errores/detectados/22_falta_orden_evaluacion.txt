@@ -1,5 +1,5 @@
 demo
-    PES_I function f (PES_I x1, PES_I x2)
+    INTEGER function f (INTEGER x1, INTEGER x2)
     begin
         x2 := x1;
     end;

@@ -1,4 +1,4 @@
-PES_I x;
+INTEGER x;
 BEGIN
     x := 10$i;
     POUT(x);

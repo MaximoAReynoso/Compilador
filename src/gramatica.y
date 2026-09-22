@@ -15,11 +15,11 @@ void yyerror(const char *s);
     int val_int;
 }
 
-%token <simbolo> ID CTE CTE_FLOAT PES_I MULT_STRING
+%token <simbolo> ID CTE CTE_FLOAT MULT_STRING
 
 %token ASSIGN GE LE EQ NE
 
-%token IF ELSE END_IF BEGIN END POUT RET CLASS FUNCTION SINGLEF
+%token IF ELSE END_IF BEGIN END POUT RET CLASS FUNCTION INTEGER SINGLEF
 %token FROM TO BY REPEAT COMPTIME TOSF EXTENDS
 
 %%
@@ -65,7 +65,7 @@ declaracion_comptime:
 ;
 
 tipo_dato:
-    PES_I
+    INTEGER
   | SINGLEF
 ;
 
