@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "acciones_semanticas.h"
 #include "y.tab.h"
@@ -206,19 +207,58 @@ int yylex(){
     AccionSemantica accion;
 
     while ((c = fgetc(archivo_fuente)) != EOF){
+        int estado_anterior = estado;
         accion = matriz_acciones[estado][c];
         estado = matriz_transicion[estado][c];
 
         //printf("estado: %d\n", estado);
-        if(estado == -1){ //error
+                if(estado == -1){ //error
+            if (estado_anterior == 1 || estado_anterior == 2) {
+                char lexema_invalido[1024];
+                snprintf(lexema_invalido, sizeof(lexema_invalido), "%s", buffer_lexema);
+
+                if (isalnum((unsigned char)c) || c == '_' || c == '$') {
+                    size_t longitud = strlen(lexema_invalido);
+                    if (longitud + 1 < sizeof(lexema_invalido)) {
+                        lexema_invalido[longitud++] = (char)c;
+                        lexema_invalido[longitud] = '\0';
+                    }
+
+                    int siguiente;
+                    while ((siguiente = fgetc(archivo_fuente)) != EOF &&
+                           (isalnum((unsigned char)siguiente) || siguiente == '_' || siguiente == '$')) {
+                        if (longitud + 1 < sizeof(lexema_invalido)) {
+                            lexema_invalido[longitud++] = (char)siguiente;
+                            lexema_invalido[longitud] = '\0';
+                        }
+                    }
+                    if (siguiente != EOF) {
+                        ungetc(siguiente, archivo_fuente);
+                    }
+                } else if (c != EOF) {
+                    ungetc(c, archivo_fuente);
+                }
+
+                printf("Error léxico en línea %d: sufijo inválido en constante entera '%s'; se esperaba '$i'.\n",
+                       yylineno, lexema_invalido);
+                longitud_lexema = 0;
+                buffer_lexema[0] = '\0';
+                estado = 0;
+                yylval.simbolo = NULL;
+                return ERROR_LEXICO;
+            } //error
             printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", yylineno,c,c);
             estado = 0;
             longitud_lexema = 0;
             buffer_lexema[0] = '\0';
         }else if (estado == 15) { //estado Final
             estado = 0; //proximo token
-            if (accion != NULL)
-                return accion(c, buffer_lexema, &longitud_lexema);
+            if (accion != NULL) {
+                int token = accion(c, buffer_lexema, &longitud_lexema);
+                if (token != -1) {
+                    return token;
+                }
+            }
         }else {
             if(accion != NULL)
                 accion(c, buffer_lexema, &longitud_lexema);
@@ -231,7 +271,10 @@ int yylex(){
             AccionSemantica accion = matriz_acciones[estado][0];
             estado = 0;
             if (accion != NULL) {
-                return accion(EOF, buffer_lexema, &longitud_lexema);
+                int token = accion(EOF, buffer_lexema, &longitud_lexema);
+                if (token != -1) {
+                    return token;
+                }
             }
         } else if (estado == 9) {
             // Fin de archivo dentro de un comentario de una linea: se descarta

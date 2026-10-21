@@ -1,0 +1,13 @@
+prueba
+
+INTEGER a;
+
+begin
+
+  a := 32769$i;
+
+  a := 1$i;
+
+  pout(a);
+
+end;

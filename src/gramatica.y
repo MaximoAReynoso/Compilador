@@ -18,6 +18,7 @@ void yyerror(const char *s);
 %token <simbolo> ID CTE CTE_FLOAT MULT_STRING
 
 %token ASSIGN GE LE EQ NE
+%token OUT_OF_RANGE ERROR_LEXICO
 
 %token IF ELSE END_IF BEGIN END POUT RET CLASS FUNCTION INTEGER SINGLEF
 %token FROM TO BY REPEAT COMPTIME TOSF EXTENDS
@@ -231,7 +232,9 @@ orden_evaluacion:
 
 lista_enteros:
     lista_enteros ',' CTE
+  | lista_enteros ',' constante_invalida
   | CTE
+  | constante_invalida
 ;
 
 parametros_reales:
@@ -249,6 +252,13 @@ parametro_real:
   | ID '=' expresion_aritmetica
 ;
 
+constante_invalida:
+    OUT_OF_RANGE
+    { cant_errores++; }
+  | ERROR_LEXICO
+    { cant_errores++; }
+;
+
 constante_con_signo:
     CTE
     {
@@ -257,19 +267,13 @@ constante_con_signo:
             if (valor > 32767) {
                 printf("\nLínea %d: Error: La constante entera positiva '%s' excede el rango máximo permitido [32767]\n\n", yylineno, $1->lexema);
             }
-            char nuevo[1024];
-            snprintf(nuevo, sizeof(nuevo), "+%s", $1->lexema);
-            modificar_lexema($1, nuevo);
-            printf("[SINT] Constante entera positiva, lexema actualizado a: '%s' en línea %d\n", $1->lexema, yylineno);
+            printf("[SINT] Constante entera positiva, lexema: '%s' en línea %d\n", $1->lexema, yylineno);
         }
     }
   | CTE_FLOAT
     {
         if ($1 != NULL) {
-            char nuevo[1024];
-            snprintf(nuevo, sizeof(nuevo), "+%s", $1->lexema);
-            modificar_lexema($1, nuevo);
-            printf("[SINT] Constante float positiva, lexema actualizado a: '%s' en línea %d\n", $1->lexema, yylineno);
+            printf("[SINT] Constante float positiva, lexema: '%s' en línea %d\n", $1->lexema, yylineno);
         }
     }
   | '+' CTE
@@ -279,19 +283,13 @@ constante_con_signo:
             if (valor > 32767) {
                 printf("\nLínea %d: Error: La constante entera positiva '+%s' excede el rango máximo permitido [32767]\n\n", yylineno, $2->lexema);
             }
-            char nuevo[1024];
-            snprintf(nuevo, sizeof(nuevo), "+%s", $2->lexema);
-            modificar_lexema($2, nuevo);
-            printf("[SINT] Constante entera positiva (+), lexema actualizado a: '%s' en línea %d\n", $2->lexema, yylineno);
+            printf("[SINT] Constante entera positiva (+), lexema: '%s' en línea %d\n", $2->lexema, yylineno);
         }
     }
   | '+' CTE_FLOAT
     {
         if ($2 != NULL) {
-            char nuevo[1024];
-            snprintf(nuevo, sizeof(nuevo), "+%s", $2->lexema);
-            modificar_lexema($2, nuevo);
-            printf("[SINT] Constante float positiva (+), lexema actualizado a: '%s' en línea %d\n", $2->lexema, yylineno);
+            printf("[SINT] Constante float positiva (+), lexema: '%s' en línea %d\n", $2->lexema, yylineno);
         }
     }
   | '-' CTE
@@ -312,6 +310,9 @@ constante_con_signo:
             printf("[SINT] Constante float negativa, lexema actualizado a: '%s' en línea %d\n", $2->lexema, yylineno);
         }
     }
+  | constante_invalida
+  | '+' constante_invalida
+  | '-' constante_invalida
 ;
 
 if_sentencia:

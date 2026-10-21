@@ -84,6 +84,7 @@ int as_classify_and_emit(int c, char *buffer, int *len){
 
 int as_emit_token_FLOAT(int c, char *buffer, int *len){
     ungetc(c, archivo_fuente);
+    yylval.simbolo = NULL;
 
     char buffer_aux[1024];
     strncpy(buffer_aux, buffer, sizeof(buffer_aux) - 1);
@@ -99,26 +100,18 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
     errno=0;
     float valor = strtof(buffer_aux, &ptr);
 
-    if (valor != 0.0f) {
-            if (errno == ERANGE || valor < FLT_MIN) {
-                printf("\nLínea %d: Error: Underflow en constante float '%s' (menor a %e)\n\n", yylineno, buffer, FLT_MIN);
-                *len = 0;
-                buffer[0] = '\0';
-                return -1;
-            }
-
-            if (valor > FLT_MAX) {
-                printf("\nLínea %d: Error: Overflow en constante float '%s' (mayor a %e)\n\n",
-                       yylineno, buffer, FLT_MAX);
-                *len = 0;
-                buffer[0] = '\0';
-                return -1;
-            }
+    if (errno == ERANGE) {
+        if (valor > -FLT_MIN && valor < FLT_MIN) {
+            printf("\nLínea %d: Error: Underflow en constante float '%s' (menor a %e)\n\n", yylineno, buffer, FLT_MIN);
+        } else {
+            printf("\nLínea %d: Error: Overflow en constante float '%s' (mayor a %e)\n\n",yylineno, buffer, FLT_MAX);
+        }
+        *len = 0;
+        buffer[0] = '\0';
+        printf("[LEX] Token emitido: OUT_OF_RANGE en línea %d\n", yylineno);
+        return OUT_OF_RANGE;
     }
 
-    if (c != EOF) {
-        ungetc(c, archivo_fuente);
-    }
     yylval.simbolo = insertar_simbolo(tabla_actual, buffer, CTE_FLOAT);
     
     printf("[LEX] Token emitido: CTE_FLOAT (lexema: '%s') en línea %d\n", buffer, yylineno);
@@ -129,10 +122,9 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
 
 int as_emit_token_INT(int c, char *buffer, int *len){
 
+    yylval.simbolo = NULL;    
     errno = 0;
-
     char *ptr;
-    
     long valor = strtoll(buffer,&ptr, 10);
 
     if (errno == ERANGE) {// captura del error causado por C
@@ -140,7 +132,8 @@ int as_emit_token_INT(int c, char *buffer, int *len){
         printf("\nLínea %d: Error: Fallo en '%s' -> C reporta: \"%s\"\n\n", yylineno, buffer, mensaje_error_c);
         *len = 0;
         buffer[0] = '\0';
-        return -1;
+        printf("[LEX] Token emitido: OUT_OF_RANGE en línea %d\n", yylineno);
+        return OUT_OF_RANGE;
     }
 
     // asumo que todos los valores son positivos
@@ -148,7 +141,8 @@ int as_emit_token_INT(int c, char *buffer, int *len){
         printf("\nLínea %d: Error: El valor '%ld'excede el rango de 16 bits [%d]\n\n", yylineno, valor,MAX_INT_CTE);
         *len = 0;
         buffer[0] = '\0';
-        return -1;
+        printf("[LEX] Token emitido: OUT_OF_RANGE en línea %d\n", yylineno);
+        return OUT_OF_RANGE;
     }
     
     buffer[*len] = 'i';
