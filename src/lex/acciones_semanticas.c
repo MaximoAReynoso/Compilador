@@ -20,6 +20,16 @@ void establecer_tabla_simbolos(TablaSimbolos *tabla) {
     tabla_actual = tabla;
 }
 
+Simbolo *cambiar_signo_constante(Simbolo *simbolo, int signo) {
+    if (simbolo == NULL || tabla_actual == NULL) {
+        return NULL;
+    }
+
+    char lexema[1024];
+    snprintf(lexema, sizeof(lexema), "%s%s", signo < 0 ? "-" : "+", simbolo->lexema);
+    return mover_ocurrencia(tabla_actual, simbolo, lexema);
+}
+
 int as_count_line(int c, char *buffer, int *len){
     yylineno++;
     *len = 0;
@@ -211,8 +221,8 @@ int as_emit_token_string(int c, char *buffer, int *len){
 }
 
 bool id_valido(char *buffer) {
-    // Verificar que el primer carácter sea una letra o un guion bajo
-    if (!(buffer[0] >= 'a' && buffer[0] <= 'z')) {
+    // Verificar que el primer carácter no sea mayuscula
+    if ((buffer[0] >= 'A' && buffer[0] <= 'Z')) {
         return false;
     }
 
@@ -233,7 +243,10 @@ int as_PR_IDENT(int c, char *buffer, int *len){
         ungetc(c, archivo_fuente);    //retraer caracter que trajo a este estado
     }
 
-    char *cadena = buffer;
+    char cadena[1024];
+    
+    strncpy(cadena, buffer, sizeof(cadena) - 1);
+    cadena[sizeof(cadena) - 1] = '\0';
 
     for (int i = 0; cadena[i] != '\0'; i++) {
         cadena[i] = (char)tolower((unsigned char)cadena[i]);
@@ -344,6 +357,11 @@ int as_PR_IDENT(int c, char *buffer, int *len){
             buffer[0] = '\0';
             return ID;
         }
+        printf("Error léxico en línea %d: identificador malformado '%s'; debe comenzar con una letra y continuar con letras, dígitos o '_'.\n",
+               yylineno, buffer);
+        *len = 0;
+        buffer[0] = '\0';
+        return ERROR_LEXICO;
     }
     //limpio el buffer
     *len = 0;

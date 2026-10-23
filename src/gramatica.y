@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tabla_simbolos.h"
+#include "acciones_semanticas.h"
 
 extern int yylex(void);
 extern int yylineno;
@@ -35,6 +36,8 @@ programa:
             printf("Sintaxis incorrecta: finalizado con %d error(es).\n", cant_errores);
         }
     }
+  | ID bloque_declarativo bloque_ejecutable 
+    { yyerror("Error: Falta el delimitador ; al final del bloque ejecutable."); yyerrok; }
   | ID bloque_declarativo BEGIN lista_ejecutables
     { yyerror("Error: Falta el delimitador END al final del bloque ejecutable."); yyerrok; }
   | bloque_declarativo bloque_ejecutable ';'
@@ -92,6 +95,8 @@ declaracion_funcion:
     { printf("[SINT] Estructura FUNCTION, en línea %d\n", yylineno); }
   | tipo_dato FUNCTION error '(' lista_parametros ')' bloque_declarativo bloque_ejecutable
     { yyerror("Error: Falta el nombre (identificador) de la función."); yyerrok; }
+  | tipo_dato FUNCTION ID '(' ')' bloque_declarativo bloque_ejecutable
+    { yyerror("Error: Faltan los parametros de la función."); yyerrok; }
 ;
 
 lista_parametros:
@@ -239,7 +244,6 @@ lista_enteros:
 
 parametros_reales:
     lista_parametros_reales
-  |
 ;
 
 lista_parametros_reales:
@@ -295,19 +299,15 @@ constante_con_signo:
   | '-' CTE
     {
         if ($2 != NULL) {
-            char nuevo[1024];
-            snprintf(nuevo, sizeof(nuevo), "-%s", $2->lexema);
-            modificar_lexema($2, nuevo);
-            printf("[SINT] Constante entera negativa, lexema actualizado a: '%s' en línea %d\n", $2->lexema, yylineno);
+        Simbolo *negativo = cambiar_signo_constante($2, -1);
+        printf("[SINT] Constante entera negativa, lexema actualizado a: '%s' en línea %d\n", negativo->lexema, yylineno);
         }
     }
   | '-' CTE_FLOAT
     {
         if ($2 != NULL) {
-            char nuevo[1024];
-            snprintf(nuevo, sizeof(nuevo), "-%s", $2->lexema);
-            modificar_lexema($2, nuevo);
-            printf("[SINT] Constante float negativa, lexema actualizado a: '%s' en línea %d\n", $2->lexema, yylineno);
+        Simbolo *negativo = cambiar_signo_constante($2, -1);
+        printf("[SINT] Constante float negativa, lexema actualizado a: '%s' en línea %d\n", negativo->lexema, yylineno);
         }
     }
   | constante_invalida
@@ -333,10 +333,8 @@ fin_if:
 ;
 
 iteracion:
-    encabezado_iteracion cuerpo_iteracion REPEAT
+    encabezado_iteracion REPEAT cuerpo_iteracion  
     { printf("[SINT] Estructura ITERACION, en línea %d\n", yylineno); }
-  | encabezado_iteracion error REPEAT
-    { yyerror("Error: Falta o hay un error en el cuerpo de la iteración."); yyerrok; }
 ;
 
 encabezado_iteracion:
@@ -389,7 +387,7 @@ void yyerror(const char *s) {
 
     if (strstr(s, "Sentencia mal formada") != NULL) {
         cant_errores++; 
-        fprintf(stderr, "%s[ERROR DE SINTAXIS]%s %sLínea %d:%s Sentencia inválida. Es posible que falte un delimitador estructural (como 'END_IF' o ';') o un operador.\n", 
+        fprintf(stderr, "%s[ERROR DE SINTAXIS]%s %sLínea %d:%s Sentencia inválida.\n", 
                 COLOR_ROJO, COLOR_RESET, COLOR_AMARILLO, yylineno, COLOR_RESET);
         return;
     }

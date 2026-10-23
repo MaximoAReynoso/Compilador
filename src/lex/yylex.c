@@ -145,7 +145,7 @@ void init_lexer(){
     matriz_acciones[0][46] = as_add_to_buffer;            //.
     matriz_acciones[1][46] = as_add_to_buffer;
 
-    matriz_acciones[0][33] = as_add_to_buffer;;           //!
+    matriz_acciones[0][33] = as_add_to_buffer;            //!
     matriz_acciones[0][58] = as_add_to_buffer;            //:
 
     matriz_acciones[0][61] = as_add_to_buffer;            //=
@@ -212,7 +212,7 @@ int yylex(){
         estado = matriz_transicion[estado][c];
 
         //printf("estado: %d\n", estado);
-                if(estado == -1){ //error
+        if(estado == -1){ //error
             if (estado_anterior == 1 || estado_anterior == 2) {
                 char lexema_invalido[1024];
                 snprintf(lexema_invalido, sizeof(lexema_invalido), "%s", buffer_lexema);

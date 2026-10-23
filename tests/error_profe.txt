@@ -1,13 +1,11 @@
 prueba
 
-INTEGER a;
+INTEGER a, x;
 
 begin
 
-  a := 12;
+  a := f(x);
 
-  a := 12$u;
-
-  a := 1$i;
+  a := f()[1$i];
 
 end;

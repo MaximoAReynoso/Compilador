@@ -39,6 +39,7 @@ Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token) {
 
     Simbolo *existe = buscar_simbolo(tabla, lexema);
     if (existe != NULL) {
+        existe->cantidad++;
         return existe;
     }
     
@@ -57,9 +58,39 @@ Simbolo *insertar_simbolo(TablaSimbolos *tabla, const char *lexema, int token) {
     strcpy(nuevo_simbolo->lexema, lexema);
     nuevo_simbolo->token = token;
     nuevo_simbolo->siguiente = tabla->entradas[index];
+    nuevo_simbolo->cantidad = 1;
     tabla->entradas[index] = nuevo_simbolo;
 
     return nuevo_simbolo;
+}
+
+Simbolo *mover_ocurrencia(TablaSimbolos *tabla, Simbolo *simbolo, const char *nuevo_lexema) {
+    if (tabla == NULL || simbolo == NULL || nuevo_lexema == NULL) {
+        return NULL;
+    }
+
+    Simbolo *destino = insertar_simbolo(tabla, nuevo_lexema, simbolo->token);
+    if (destino == NULL || destino == simbolo) {
+        return destino;
+    }
+
+    if (simbolo->cantidad > 1) {
+        simbolo->cantidad--;
+        return destino;
+    }
+
+    unsigned index = hash(simbolo->lexema);
+    Simbolo **actual = &tabla->entradas[index];
+    while (*actual != NULL && *actual != simbolo) {
+        actual = &(*actual)->siguiente;
+    }
+    if (*actual == simbolo) {
+        *actual = simbolo->siguiente;
+        free(simbolo->lexema);
+        free(simbolo);
+    }
+
+    return destino;
 }
 
 void modificar_lexema(Simbolo *simbolo, const char *nuevo_lexema) {

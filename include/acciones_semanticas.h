@@ -38,5 +38,6 @@ bool id_valido(char *buffer);
 
 int as_PR_IDENT(int c, char *buffer, int *len);
 
+Simbolo *cambiar_signo_constante(Simbolo *simbolo, int signo);
 
 #endif
