@@ -218,12 +218,33 @@ termino:
   | operando
 ;
 
+expresion_sin_asignacion:
+    expresion_sin_asignacion '+' termino_sin_asignacion
+  | expresion_sin_asignacion '-' termino_sin_asignacion
+  | termino_sin_asignacion
+;
+
+termino_sin_asignacion:
+    termino_sin_asignacion '*' operando_base
+  | termino_sin_asignacion '/' operando_base
+  | operando_base
+;
+
 operando:
+    operando_base
+  | ID '=' '(' expresion_sin_asignacion ')'
+;
+
+operando_base:
     ID
   | ID '.' ID
   | ID '[' expresion_aritmetica ']'
   | ID '(' parametros_reales ')' orden_evaluacion
   | ID '.' ID '(' parametros_reales ')' orden_evaluacion
+  | ID '(' parametros_reales ')'
+    { yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
+  | ID '.' ID '(' parametros_reales ')'
+    { yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
   | TOSF '(' expresion_aritmetica ')'
   | constante_con_signo
 ;
@@ -232,7 +253,6 @@ orden_evaluacion:
     '[' lista_enteros ']'
   | '[' error ']'
     { yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
-  |
 ;
 
 lista_enteros:
@@ -316,20 +336,25 @@ constante_con_signo:
 ;
 
 if_sentencia:
-    IF '(' condicion ')' bloque_o_sentencia fin_if
+    IF '(' condicion ')' bloque_if fin_if
     { printf("[SINT] Estructura IF, en línea %d\n", yylineno); }
-  | IF condicion ')' bloque_o_sentencia fin_if
+  | IF condicion ')' bloque_if fin_if
     { yyerror("Error: Falta '(' en la condición de selección."); yyerrok; }
-  | IF '(' condicion bloque_o_sentencia fin_if
+  | IF '(' condicion bloque_if fin_if
     { yyerror("Error: Falta ')' en la condición de selección."); yyerrok; }
-  | IF '(' condicion ')' bloque_o_sentencia error
+  | IF '(' condicion ')' bloque_if error
     { yyerror("Error: Estructura IF mal cerrada (posiblemente falta END_IF o el delimitador ';')."); yyerrok; }
 ;
 
 fin_if:
-    ELSE bloque_o_sentencia END_IF
+    ELSE bloque_if END_IF
     { printf("[SINT] Estructura ELSE, en línea %d\n", yylineno); }
   | END_IF
+;
+
+bloque_if:
+    bloque_ejecutable
+  | sentencia ';'
 ;
 
 iteracion:

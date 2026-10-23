@@ -1,11 +1,41 @@
-prueba
+programa_1
 
-INTEGER a, x;
+INTEGER FUNCTION f1 (INTEGER x, SINGLEF y)
+
+  INTEGER w;
+
+  INTEGER FUNCTION f11 (INTEGER x1, INTEGER x2)
+
+  begin
+
+    x2 := x1;
+
+  end;
 
 begin
 
-  a := f(x);
+  x := f11(x, 0$i)[1$i, 2$i];
 
-  a := f()[1$i];
+  if (x > 1$i)
+
+    ret (x + 2$i);
+
+  else
+
+    begin
+
+      x := 2$i;
+
+      ret (x * 2$i);
+
+    end
+
+  end_if;
+
+end;
+
+begin
+
+  pout("fin");
 
 end;
