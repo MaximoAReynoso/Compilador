@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "tabla_simbolos.h"
 #include "y.tab.h"
 #include "yylex.h"
-#include "tabla_simbolos.h"
 #include "acciones_semanticas.h"
-
+#include "polaca.h"
+#include "errores.h"
 
 extern int yyparse();
 extern int yylineno;
@@ -20,9 +21,18 @@ int main(int argc, char* argv[]) {
     FILE *file = fopen(file_path, "r");
 
     if (file == NULL) {
-        printf("Error: No se pudo abrir el archivo '%s'.\n",file_path);
+        printf("Error: No se pudo abrir el archivo '%s'.\n", file_path);
         return 1;
     }
+
+    // Inicialización de subsistemas del compilador
+    inicializar_errores();
+    inicializar_gestor_ambitos();
+    inicializar_gestor_polaca();
+
+    // Crear polaca principal
+    Polaca *polaca_main = crear_polaca("main");
+    establecer_polaca_actual(polaca_main);
 
     TablaSimbolos tabla;
     inicializar_tabla(&tabla);
@@ -31,23 +41,20 @@ int main(int argc, char* argv[]) {
     init_lexer();
     set_lexer_file(file);
 
-    printf("--- Iniciando Analisis sintactico ---\n");
-
-    int resultado = yyparse();
-  
-    /*if (resultado == 0) {
-        printf("Compilación exitosa: No se encontraron errores sintácticos.\n");
-    } else {
-        printf("\n Fallo el analisis sintactico.\n");
-    }*/
-
-    printf("--- Fin de archivo ---\n\n");
-    imprimir_tabla(&tabla);
+    yyparse();
 
     fclose(file);
-    destruir_tabla(&tabla);
 
-    //yylex_destroy();
+    // Salida según los requerimientos de entrega (Paso 5)
+    imprimir_errores();
+    imprimir_todas_las_polacas();
+    imprimir_tabla(&tabla);
+
+    // Liberación de recursos
+    destruir_tabla(&tabla);
+    destruir_gestor_polaca();
+    destruir_gestor_ambitos();
+    destruir_errores();
 
     return 0;
-}    
+}

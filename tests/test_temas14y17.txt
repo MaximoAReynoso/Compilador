@@ -1,0 +1,33 @@
+prog_temas
+INTEGER a, b, c;
+INTEGER i, j;
+
+INTEGER FUNCTION foo(INTEGER p1, INTEGER p2, INTEGER p3)
+BEGIN
+    ret(p1 + p2 + p3);
+END;
+
+BEGIN
+    a := 1$i;
+    b := 2$i;
+
+    // Tema 17: asignacion en expresion
+    c := b = (4$i);
+    pout(c);
+
+    // Tema 17 en invocacion de funcion con orden (Tema 19)
+    c := foo(a, b = 4$i, a + b)[1, 2, 3];
+    pout(c);
+
+    // Tema 14: ciclo FROM ascendente
+    from i = 1$i to 10$i by 1$i repeat
+    begin
+        pout(i);
+    end;
+
+    // Tema 14: ciclo FROM descendente
+    from j = 10$i to 0$i by 2$i repeat
+        pout(j);
+
+    pout("fin");
+END;

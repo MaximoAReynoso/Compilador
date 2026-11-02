@@ -7,6 +7,7 @@
 #include "tabla_simbolos.h"
 
 void establecer_tabla_simbolos(TablaSimbolos *tabla);
+TablaSimbolos *obtener_tabla_simbolos(void);
 
 int as_count_line(int c, char *buffer, int *len);   // cuenta lineas
 

@@ -266,6 +266,9 @@ void imprimir_todas_las_polacas(void) {
     }
 
     for (Polaca *p = lista_polacas; p != NULL; p = p->siguiente) {
+        if (p->nombre && strncmp(p->nombre, "param_", 6) == 0) {
+            continue;
+        }
         imprimir_polaca(p);
     }
     printf("============================================================\n\n");

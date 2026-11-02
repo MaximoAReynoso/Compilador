@@ -24,7 +24,7 @@ begin
 
     begin
 
-      x := 2$i;
+      x := -2$i;
 
       ret (x * 2$i);
 
