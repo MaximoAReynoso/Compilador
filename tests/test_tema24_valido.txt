@@ -1,0 +1,25 @@
+test_tema24_ok
+
+CLASS clase_uno cod_compartido
+BEGIN
+    INTEGER a;
+    SINGLEF b;
+END;
+
+CLASS clase_dos cod_compartido
+BEGIN
+    INTEGER x;
+    SINGLEF y;
+END;
+
+clase_uno obj1, obj1b;
+clase_dos obj2;
+
+BEGIN
+    // Asignacion entre objetos de la misma clase
+    obj1 := obj1b;
+
+    // Asignacion entre clases distintas con el MISMO codigo (Tema 24)
+    obj1 := obj2;
+    obj2 := obj1;
+END;

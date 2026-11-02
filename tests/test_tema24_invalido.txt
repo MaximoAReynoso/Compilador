@@ -1,0 +1,23 @@
+test_tema24_err
+
+CLASS clase_a cod_uno
+BEGIN
+    INTEGER x;
+END;
+
+CLASS clase_b cod_uno
+BEGIN
+    SINGLEF y;
+END;
+
+CLASS clase_c cod_dos
+BEGIN
+    INTEGER z;
+END;
+
+clase_a obj_a;
+clase_c obj_c;
+
+BEGIN
+    obj_a := obj_c;
+END;

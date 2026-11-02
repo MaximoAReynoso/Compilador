@@ -31,8 +31,15 @@ typedef enum {
 typedef struct ParametroFormal {
     char *nombre;
     TipoDato tipo;
+    bool es_comptime;
     struct ParametroFormal *siguiente;
 } ParametroFormal;
+
+typedef struct AtributoClase {
+    char *nombre;
+    TipoDato tipo;
+    struct AtributoClase *siguiente;
+} AtributoClase;
 
 /* Entrada de la Tabla de Símbolos */
 typedef struct Simbolo {
@@ -55,14 +62,25 @@ typedef struct Simbolo {
     int cant_parametros;
     ParametroFormal *parametros;
 
-    // Metadatos para clases y herencia (Temas 24 y 32)
+    // Metadatos para clases y herencia (Temas 24, 29 y 32)
     char *codigo_clase;        // Tema 24: Identificador de código de la clase
     char **clases_padre;       // Tema 32: Nombres de las clases base de las que hereda
     int cant_padres;
     char *tipo_clase;          // Para objetos: nombre de la clase a la que pertenece
+    AtributoClase *atributos;  // Lista de atributos declarados en la clase
+    int cant_atributos;
 
     struct Simbolo *siguiente;
 } Simbolo;
+
+/* Información de evaluación semántica de expresiones (Tema 22 y 24) */
+typedef struct InfoExpr {
+    bool es_comptime;
+    long val_int;
+    double val_float;
+    TipoDato tipo;
+    Simbolo *simbolo_ref;
+} InfoExpr;
 
 typedef struct {
     Simbolo *entradas[TAM_TABLA];
@@ -109,5 +127,8 @@ Simbolo *declarar_identificador(
     UsoSimbolo uso,
     int linea
 );
+
+/* Chequeo de compatibilidad estructural entre clases (Tema 24) */
+bool clases_tienen_misma_estructura(Simbolo *c1, Simbolo *c2);
 
 #endif

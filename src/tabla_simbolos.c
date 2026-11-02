@@ -132,6 +132,15 @@ static void liberar_simbolo(Simbolo *s) {
         pf = sig;
     }
 
+    // Liberar atributos de clase si los hay
+    AtributoClase *at = s->atributos;
+    while (at != NULL) {
+        AtributoClase *sig = at->siguiente;
+        if (at->nombre) free(at->nombre);
+        free(at);
+        at = sig;
+    }
+
     // Liberar clases base si las hay
     if (s->clases_padre) {
         for (int i = 0; i < s->cant_padres; i++) {
@@ -343,4 +352,18 @@ void imprimir_tabla(TablaSimbolos *tabla) {
         }
     }
     printf("========================================================================================\n\n");
+}
+
+bool clases_tienen_misma_estructura(Simbolo *c1, Simbolo *c2) {
+    if (!c1 || !c2) return false;
+    if (c1->cant_atributos != c2->cant_atributos) return false;
+
+    AtributoClase *a1 = c1->atributos;
+    AtributoClase *a2 = c2->atributos;
+    while (a1 != NULL && a2 != NULL) {
+        if (a1->tipo != a2->tipo) return false;
+        a1 = a1->siguiente;
+        a2 = a2->siguiente;
+    }
+    return true;
 }

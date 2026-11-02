@@ -16,7 +16,7 @@ BEGIN
     pout(c);
 
     // Tema 17 en invocacion de funcion con orden (Tema 19)
-    c := foo(a, b = 4$i, a + b)[1, 2, 3];
+    c := foo(a, b = 4$i, a + b)[1$i, 2$i, 3$i];
     pout(c);
 
     // Tema 14: ciclo FROM ascendente

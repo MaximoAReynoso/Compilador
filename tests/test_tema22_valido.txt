@@ -1,0 +1,18 @@
+test_tema22
+COMPTIME INTEGER c1, c2;
+INTEGER x, y;
+
+INTEGER FUNCTION foo(COMPTIME INTEGER p_comp, INTEGER p_norm)
+BEGIN
+    ret(p_comp + p_norm);
+END;
+
+BEGIN
+    c1 := 10$i;
+    c2 := c1 * 3$i + 5$i;
+    x := c2;
+    pout(x);
+
+    y := foo(4$i, x) [1$i, 2$i];
+    pout(y);
+END;

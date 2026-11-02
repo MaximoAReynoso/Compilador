@@ -53,6 +53,7 @@ typedef struct {
     Simbolo *fn_simbolo;
     char *nombre_fn;
     Polaca *args_polaca[16];
+    bool args_comptime[16];
     int cant_args;
     int orden[16];
     int cant_orden;
@@ -139,6 +140,19 @@ static void finalizar_invocacion_con_orden(void) {
                 pf = pf->siguiente;
             }
             if (pf != NULL) {
+                // Chequeo Tema 22: si el parámetro formal es COMPTIME, el argumento real debe ser comptime
+                if (pf->es_comptime) {
+                    if (idx < inv.cant_args && !inv.args_comptime[idx]) {
+                        registrar_error(
+                            ETAPA_SEMANTICO,
+                            inv.linea,
+                            "El parámetro formal '%s' de '%s' es COMPTIME y no puede recibir una expresión no determinable en tiempo de compilación.",
+                            pf->nombre,
+                            inv.nombre_fn
+                        );
+                    }
+                }
+
                 char ambito_fn[256];
                 snprintf(ambito_fn, sizeof(ambito_fn), "%s:%s",
                          fn->ambito ? fn->ambito : "main",
@@ -183,6 +197,9 @@ static void finalizar_invocacion_con_orden(void) {
 
     if (inv.nombre_fn) free(inv.nombre_fn);
 }
+
+/* Estado para Tema 24: Clases con código */
+static Simbolo *clase_actual_declaracion = NULL;
 %}
 
 %union {
@@ -190,6 +207,7 @@ static void finalizar_invocacion_con_orden(void) {
     int val_int;
     int tipo_dato;
     const char *cadena;
+    InfoExpr info_expr;
 }
 
 %token <simbolo> ID CTE CTE_FLOAT MULT_STRING
@@ -203,6 +221,7 @@ static void finalizar_invocacion_con_orden(void) {
 %type <tipo_dato> tipo_dato
 %type <cadena> operador_relacional
 %type <simbolo> constante_con_signo destino_asignacion
+%type <info_expr> expresion_aritmetica termino operando operando_base parametro_real
 
 %%
 
@@ -273,6 +292,20 @@ declaracion_variable:
                 USO_VARIABLE,
                 yylineno
             );
+            if (clase_actual_declaracion != NULL) {
+                AtributoClase *at = calloc(1, sizeof(AtributoClase));
+                at->nombre = strdup(lista_vars_declaradas[i]->lexema);
+                at->tipo = $1;
+                at->siguiente = NULL;
+                if (clase_actual_declaracion->atributos == NULL) {
+                    clase_actual_declaracion->atributos = at;
+                } else {
+                    AtributoClase *curr = clase_actual_declaracion->atributos;
+                    while (curr->siguiente != NULL) curr = curr->siguiente;
+                    curr->siguiente = at;
+                }
+                clase_actual_declaracion->cant_atributos++;
+            }
         }
         cant_vars_declaradas = 0;
     }
@@ -411,19 +444,87 @@ parametro:
             fn->cant_parametros++;
         }
     }
+  | COMPTIME tipo_dato ID
+    {
+        Simbolo *p_sym = declarar_identificador(
+            obtener_tabla_simbolos(),
+            $3->lexema,
+            ID,
+            $2,
+            USO_VARIABLE_COMPTIME,
+            yylineno
+        );
+        if (p_sym != NULL) {
+            p_sym->valor_comptime_valido = true;
+        }
+        if (tope_fn_decl > 0 && pila_fn_decl[tope_fn_decl - 1] != NULL) {
+            Simbolo *fn = pila_fn_decl[tope_fn_decl - 1];
+            ParametroFormal *pf = calloc(1, sizeof(ParametroFormal));
+            pf->nombre = strdup($3->lexema);
+            pf->tipo = $2;
+            pf->es_comptime = true;
+            pf->siguiente = NULL;
+            if (fn->parametros == NULL) {
+                fn->parametros = pf;
+            } else {
+                ParametroFormal *curr = fn->parametros;
+                while (curr->siguiente != NULL) curr = curr->siguiente;
+                curr->siguiente = pf;
+            }
+            fn->cant_parametros++;
+        }
+    }
   | tipo_dato
     { yyerror("Error: Falta el nombre del parámetro formal en la función."); yyerrok; }
 ;
 
 declaracion_clase:
-    CLASS ID { entrar_ambito($2->lexema); } codigo_clase encabezado_clase miembros_clase END
+    CLASS ID {
+        Simbolo *cls = declarar_identificador(
+            obtener_tabla_simbolos(),
+            $2->lexema,
+            CLASS,
+            TIPO_CLASE,
+            USO_CLASE,
+            yylineno
+        );
+        clase_actual_declaracion = cls;
+        entrar_ambito($2->lexema);
+    } codigo_clase encabezado_clase miembros_clase END
     {
+        if (clase_actual_declaracion && clase_actual_declaracion->codigo_clase) {
+            TablaSimbolos *ts = obtener_tabla_simbolos();
+            for (int i = 0; i < TAM_TABLA; i++) {
+                for (Simbolo *curr = ts->entradas[i]; curr != NULL; curr = curr->siguiente) {
+                    if (curr->uso == USO_CLASE && curr != clase_actual_declaracion && curr->codigo_clase != NULL) {
+                        if (strcmp(curr->codigo_clase, clase_actual_declaracion->codigo_clase) == 0) {
+                            if (!clases_tienen_misma_estructura(curr, clase_actual_declaracion)) {
+                                registrar_error(
+                                    ETAPA_SEMANTICO,
+                                    yylineno,
+                                    "La clase '%s' tiene el mismo código '%s' que la clase '%s', pero sus estructuras no son compatibles.",
+                                    clase_actual_declaracion->nombre_original ? clase_actual_declaracion->nombre_original : clase_actual_declaracion->lexema,
+                                    clase_actual_declaracion->codigo_clase,
+                                    curr->nombre_original ? curr->nombre_original : curr->lexema
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        clase_actual_declaracion = NULL;
         salir_ambito();
     }
 ;
 
 codigo_clase:
     ID
+    {
+        if (clase_actual_declaracion != NULL) {
+            clase_actual_declaracion->codigo_clase = strdup($1->lexema);
+        }
+    }
   | { yyerror("Error: Ausencia del código en la declaración de la clase."); yyerrok; }
 ;
 
@@ -486,6 +587,49 @@ sentencia_retorno:
 asignacion:
     destino_asignacion ASSIGN expresion_aritmetica
     {
+        Simbolo *dest = $1;
+        if (dest != NULL) {
+            // Tema 22: Asignación a variable COMPTIME
+            if (dest->uso == USO_VARIABLE_COMPTIME) {
+                if (!$3.es_comptime) {
+                    registrar_error(
+                        ETAPA_SEMANTICO,
+                        yylineno,
+                        "No se puede asignar una expresión no determinable en tiempo de compilación a la variable COMPTIME '%s'.",
+                        dest->nombre_original ? dest->nombre_original : dest->lexema
+                    );
+                } else {
+                    dest->valor_comptime_valido = true;
+                    dest->valor_int = $3.val_int;
+                    dest->valor_float = $3.val_float;
+                }
+            }
+
+            // Tema 24: Asignación por estructura en objetos con código
+            if (dest->uso == USO_OBJETO) {
+                Simbolo *orig = $3.simbolo_ref;
+                if (orig != NULL && orig->uso == USO_OBJETO) {
+                    if (dest->tipo_clase && orig->tipo_clase) {
+                        if (strcmp(dest->tipo_clase, orig->tipo_clase) != 0) {
+                            Simbolo *cls_dest = buscar_identificador_semantico(obtener_tabla_simbolos(), dest->tipo_clase);
+                            Simbolo *cls_orig = buscar_identificador_semantico(obtener_tabla_simbolos(), orig->tipo_clase);
+                            if (!cls_dest || !cls_orig || !cls_dest->codigo_clase || !cls_orig->codigo_clase ||
+                                strcmp(cls_dest->codigo_clase, cls_orig->codigo_clase) != 0) {
+                                registrar_error(
+                                    ETAPA_SEMANTICO,
+                                    yylineno,
+                                    "Asignación no permitida: el objeto '%s' (clase '%s') y el objeto '%s' (clase '%s') no poseen el mismo código de clase.",
+                                    dest->nombre_original ? dest->nombre_original : dest->lexema,
+                                    dest->tipo_clase,
+                                    orig->nombre_original ? orig->nombre_original : orig->lexema,
+                                    orig->tipo_clase
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
         polaca_emitir_operador(":=", yylineno);
     }
   | destino_asignacion '=' expresion_aritmetica
@@ -548,32 +692,99 @@ expresion_aritmetica:
     expresion_aritmetica '+' termino
     {
         polaca_emitir_operador("+", yylineno);
+        $$.simbolo_ref = NULL;
+        $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.es_comptime && $3.es_comptime) {
+            $$.es_comptime = true;
+            if ($$.tipo == TIPO_INTEGER) {
+                $$.val_int = $1.val_int + $3.val_int;
+                $$.val_float = (double)$$.val_int;
+            } else {
+                $$.val_float = $1.val_float + $3.val_float;
+                $$.val_int = (long)$$.val_float;
+            }
+        } else {
+            $$.es_comptime = false;
+        }
     }
   | expresion_aritmetica '-' termino
     {
         polaca_emitir_operador("-", yylineno);
+        $$.simbolo_ref = NULL;
+        $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.es_comptime && $3.es_comptime) {
+            $$.es_comptime = true;
+            if ($$.tipo == TIPO_INTEGER) {
+                $$.val_int = $1.val_int - $3.val_int;
+                $$.val_float = (double)$$.val_int;
+            } else {
+                $$.val_float = $1.val_float - $3.val_float;
+                $$.val_int = (long)$$.val_float;
+            }
+        } else {
+            $$.es_comptime = false;
+        }
     }
   | expresion_aritmetica '+' error 
-    { yyerror("Error: Falta operando en la expresión después de '+'."); yyerrok; }
+    { yyerror("Error: Falta operando en la expresión después de '+'."); yyerrok; $$.es_comptime = false; }
   | expresion_aritmetica '-' error 
-    { yyerror("Error: Falta operando en la expresión después de '-'."); yyerrok; }
+    { yyerror("Error: Falta operando en la expresión después de '-'."); yyerrok; $$.es_comptime = false; }
   | termino
+    {
+        $$ = $1;
+    }
 ;
 
 termino:
     termino '*' operando
     {
         polaca_emitir_operador("*", yylineno);
+        $$.simbolo_ref = NULL;
+        $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.es_comptime && $3.es_comptime) {
+            $$.es_comptime = true;
+            if ($$.tipo == TIPO_INTEGER) {
+                $$.val_int = $1.val_int * $3.val_int;
+                $$.val_float = (double)$$.val_int;
+            } else {
+                $$.val_float = $1.val_float * $3.val_float;
+                $$.val_int = (long)$$.val_float;
+            }
+        } else {
+            $$.es_comptime = false;
+        }
     }
   | termino '/' operando
     {
         polaca_emitir_operador("/", yylineno);
+        $$.simbolo_ref = NULL;
+        $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.es_comptime && $3.es_comptime) {
+            if (($$.tipo == TIPO_INTEGER && $3.val_int == 0) || ($$.tipo == TIPO_SINGLEF && $3.val_float == 0.0)) {
+                registrar_error(ETAPA_SEMANTICO, yylineno, "División por cero en evaluación de expresión COMPTIME.");
+                $$.es_comptime = false;
+            } else {
+                $$.es_comptime = true;
+                if ($$.tipo == TIPO_INTEGER) {
+                    $$.val_int = $1.val_int / $3.val_int;
+                    $$.val_float = (double)$$.val_int;
+                } else {
+                    $$.val_float = $1.val_float / $3.val_float;
+                    $$.val_int = (long)$$.val_float;
+                }
+            }
+        } else {
+            $$.es_comptime = false;
+        }
     }
   | termino '*' error 
-    { yyerror("Error: Falta operando en la expresión después de '*'."); yyerrok; }
+    { yyerror("Error: Falta operando en la expresión después de '*'."); yyerrok; $$.es_comptime = false; }
   | termino '/' error 
-    { yyerror("Error: Falta operando en la expresión después de '/'."); yyerrok; }
+    { yyerror("Error: Falta operando en la expresión después de '/'."); yyerrok; $$.es_comptime = false; }
   | operando
+    {
+        $$ = $1;
+    }
 ;
 
 expresion_sin_asignacion:
@@ -602,6 +813,9 @@ termino_sin_asignacion:
 
 operando:
     operando_base
+    {
+        $$ = $1;
+    }
   | ID '=' {
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         if (s == NULL) {
@@ -614,6 +828,9 @@ operando:
         polaca_emitir_operador(":=", yylineno);
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         polaca_emitir_simbolo(s ? s : $1, yylineno);
+        $$.es_comptime = false;
+        $$.simbolo_ref = s;
+        $$.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
     }
 ;
 
@@ -624,6 +841,20 @@ operando_base:
         if (s == NULL) {
             registrar_error(ETAPA_SEMANTICO, yylineno, "Variable o identificador '%s' no declarado o fuera de alcance.", $1->lexema);
             s = $1;
+        }
+        $$.simbolo_ref = s;
+        $$.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
+        if (s != NULL && s->uso == USO_VARIABLE_COMPTIME) {
+            if (!s->valor_comptime_valido) {
+                registrar_error(ETAPA_SEMANTICO, yylineno, "La variable COMPTIME '%s' se utiliza antes de haber sido inicializada.", $1->lexema);
+                $$.es_comptime = false;
+            } else {
+                $$.es_comptime = true;
+                $$.val_int = s->valor_int;
+                $$.val_float = s->valor_float;
+            }
+        } else {
+            $$.es_comptime = false;
         }
         polaca_emitir_simbolo(s, yylineno);
     }
@@ -637,23 +868,58 @@ operando_base:
         polaca_emitir_simbolo(s, yylineno);
         polaca_emitir_operador($3->lexema, yylineno);
         polaca_emitir_operador(".", yylineno);
+        $$.es_comptime = false;
+        $$.simbolo_ref = s;
+        $$.tipo = TIPO_NO_ASIGNADO;
     }
   | ID '[' expresion_aritmetica ']'
     {
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         polaca_emitir_simbolo(s ? s : $1, yylineno);
         polaca_emitir_operador("[]", yylineno);
+        $$.es_comptime = false;
+        $$.simbolo_ref = s;
+        $$.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
     }
   | llamada_con_orden
+    {
+        $$.es_comptime = false;
+        $$.simbolo_ref = NULL;
+        $$.tipo = TIPO_NO_ASIGNADO;
+    }
   | llamada_metodo_con_orden
+    {
+        $$.es_comptime = false;
+        $$.simbolo_ref = NULL;
+        $$.tipo = TIPO_NO_ASIGNADO;
+    }
   | TOSF '(' expresion_aritmetica ')'
     {
         polaca_emitir_operador("TOSF", yylineno);
+        $$.es_comptime = $3.es_comptime;
+        $$.tipo = TIPO_SINGLEF;
+        $$.val_float = $3.es_comptime ? (double)$3.val_int : 0.0;
+        $$.val_int = (long)$$.val_float;
+        $$.simbolo_ref = NULL;
     }
   | constante_con_signo
     {
         if ($1 != NULL) {
             polaca_emitir_simbolo($1, yylineno);
+            $$.es_comptime = true;
+            $$.simbolo_ref = $1;
+            $$.tipo = $1->tipo;
+            if ($1->tipo == TIPO_INTEGER) {
+                $$.val_int = parsear_valor_entero($1->lexema);
+                $$.val_float = (double)$$.val_int;
+            } else {
+                $$.val_float = atof($1->lexema);
+                $$.val_int = (long)$$.val_float;
+            }
+        } else {
+            $$.es_comptime = false;
+            $$.simbolo_ref = NULL;
+            $$.tipo = TIPO_NO_ASIGNADO;
         }
     }
 ;
@@ -728,7 +994,9 @@ parametro_real_item:
             Polaca *p = obtener_polaca_actual();
             polaca_desapilar_actual();
             if (inv->cant_args < 16) {
-                inv->args_polaca[inv->cant_args++] = p;
+                inv->args_polaca[inv->cant_args] = p;
+                inv->args_comptime[inv->cant_args] = $2.es_comptime;
+                inv->cant_args++;
             }
         }
     }
@@ -744,6 +1012,9 @@ iniciar_parametro:
 
 parametro_real:
     expresion_aritmetica
+    {
+        $$ = $1;
+    }
   | ID '=' {
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         if (s == NULL) {
@@ -756,6 +1027,9 @@ parametro_real:
         polaca_emitir_operador(":=", yylineno);
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         polaca_emitir_simbolo(s ? s : $1, yylineno);
+        $$.es_comptime = false;
+        $$.tipo = $4.tipo;
+        $$.simbolo_ref = s;
     }
 ;
 

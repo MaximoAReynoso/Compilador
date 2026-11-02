@@ -2,9 +2,9 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "tabla_simbolos.h"
 #include "acciones_semanticas.h"
 #include "y.tab.h"
-#include "tabla_simbolos.h"
 
 #define CANT_ESTADOS 16  //rangos de la matriz de transicion y acciones semanticas
 #define CANT_INPUTS 128
