@@ -200,6 +200,10 @@ static void finalizar_invocacion_con_orden(void) {
 
 /* Estado para Tema 24: Clases con código */
 static Simbolo *clase_actual_declaracion = NULL;
+
+/* Estado para Tema 32: Herencia múltiple */
+static char *lista_padres_declarados[16];
+static int cant_padres_declarados = 0;
 %}
 
 %union {
@@ -530,12 +534,40 @@ codigo_clase:
 
 lista_clase:
     lista_clase ',' ID
+    {
+        if (cant_padres_declarados < 16) {
+            lista_padres_declarados[cant_padres_declarados++] = strdup($3->lexema);
+        }
+    }
   | ID
+    {
+        cant_padres_declarados = 0;
+        if (cant_padres_declarados < 16) {
+            lista_padres_declarados[cant_padres_declarados++] = strdup($1->lexema);
+        }
+    }
 ;
 
 encabezado_clase:
     BEGIN
+    {
+        cant_padres_declarados = 0;
+    }
   | EXTENDS lista_clase BEGIN
+    {
+        if (clase_actual_declaracion != NULL && cant_padres_declarados > 0) {
+            clase_actual_declaracion->clases_padre = malloc(cant_padres_declarados * sizeof(char *));
+            clase_actual_declaracion->cant_padres = cant_padres_declarados;
+            for (int p = 0; p < cant_padres_declarados; p++) {
+                clase_actual_declaracion->clases_padre[p] = lista_padres_declarados[p];
+                Simbolo *padre = buscar_identificador_semantico(obtener_tabla_simbolos(), lista_padres_declarados[p]);
+                if (!padre || padre->uso != USO_CLASE) {
+                    registrar_error(ETAPA_SEMANTICO, yylineno, "La clase base '%s' no está declarada o no es una clase válida.", lista_padres_declarados[p]);
+                }
+            }
+        }
+        cant_padres_declarados = 0;
+    }
   | EXTENDS BEGIN
     { yyerror("Error: Ausencia de nombre o lista de clases después de extends."); yyerrok; }
 ;
@@ -629,6 +661,22 @@ asignacion:
                     }
                 }
             }
+            // Tema 33: Compatibilidad de tipos en asignaciones (requiere TOSF de INTEGER a SINGLEF)
+            if (dest->tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && dest->tipo != TIPO_CLASE && $3.tipo != TIPO_CLASE) {
+                if (dest->tipo == TIPO_SINGLEF && $3.tipo == TIPO_INTEGER) {
+                    registrar_error(
+                        ETAPA_SEMANTICO,
+                        yylineno,
+                        "Incompatibilidad de tipos en asignación: no se puede asignar INTEGER a SINGLEF sin conversión explícita TOSF."
+                    );
+                } else if (dest->tipo == TIPO_INTEGER && $3.tipo == TIPO_SINGLEF) {
+                    registrar_error(
+                        ETAPA_SEMANTICO,
+                        yylineno,
+                        "Incompatibilidad de tipos en asignación: no se puede asignar SINGLEF a INTEGER."
+                    );
+                }
+            }
         }
         polaca_emitir_operador(":=", yylineno);
     }
@@ -657,7 +705,20 @@ destino_asignacion:
         polaca_emitir_simbolo(s, yylineno);
         polaca_emitir_operador($3->lexema, yylineno);
         polaca_emitir_operador(".", yylineno);
-        $$ = s;
+
+        Simbolo *res_sym = s;
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                ResultadoBusquedaMiembro res_m;
+                if (resolver_miembro_herencia(obtener_tabla_simbolos(), cls, $3->lexema, yylineno, &res_m)) {
+                    res_sym = calloc(1, sizeof(Simbolo));
+                    *res_sym = *s;
+                    res_sym->tipo = res_m.tipo;
+                }
+            }
+        }
+        $$ = res_sym;
     }
   | ID '[' expresion_aritmetica ']'
     {
@@ -668,7 +729,41 @@ destino_asignacion:
         }
         polaca_emitir_simbolo(s, yylineno);
         polaca_emitir_operador("[]", yylineno);
-        $$ = s;
+
+        Simbolo *res_sym = s;
+        // Tema 29: Acceso posicional a atributos de objeto en lado izquierdo
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                if ($3.tipo != TIPO_INTEGER && $3.tipo != TIPO_NO_ASIGNADO) {
+                    registrar_error(ETAPA_SEMANTICO, yylineno, "El índice de acceso posicional del objeto '%s' debe ser INTEGER.", $1->lexema);
+                } else if ($3.es_comptime) {
+                    long idx = $3.val_int;
+                    if (idx < 0 || idx >= cls->cant_atributos) {
+                        registrar_error(
+                            ETAPA_SEMANTICO,
+                            yylineno,
+                            "Índice de atributo %ld fuera de rango [0..%d] en objeto '%s' (clase '%s').",
+                            idx,
+                            cls->cant_atributos > 0 ? cls->cant_atributos - 1 : 0,
+                            s->nombre_original ? s->nombre_original : s->lexema,
+                            s->tipo_clase
+                        );
+                    } else {
+                        AtributoClase *at = cls->atributos;
+                        for (long a = 0; a < idx && at != NULL; a++) {
+                            at = at->siguiente;
+                        }
+                        if (at != NULL) {
+                            res_sym = calloc(1, sizeof(Simbolo));
+                            *res_sym = *s;
+                            res_sym->tipo = at->tipo;
+                        }
+                    }
+                }
+            }
+        }
+        $$ = res_sym;
     }
 ;
 
@@ -694,6 +789,15 @@ expresion_aritmetica:
         polaca_emitir_operador("+", yylineno);
         $$.simbolo_ref = NULL;
         $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && $1.tipo != $3.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string($1.tipo),
+                tipo_dato_a_string($3.tipo)
+            );
+        }
         if ($1.es_comptime && $3.es_comptime) {
             $$.es_comptime = true;
             if ($$.tipo == TIPO_INTEGER) {
@@ -712,6 +816,15 @@ expresion_aritmetica:
         polaca_emitir_operador("-", yylineno);
         $$.simbolo_ref = NULL;
         $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && $1.tipo != $3.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string($1.tipo),
+                tipo_dato_a_string($3.tipo)
+            );
+        }
         if ($1.es_comptime && $3.es_comptime) {
             $$.es_comptime = true;
             if ($$.tipo == TIPO_INTEGER) {
@@ -741,6 +854,15 @@ termino:
         polaca_emitir_operador("*", yylineno);
         $$.simbolo_ref = NULL;
         $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && $1.tipo != $3.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string($1.tipo),
+                tipo_dato_a_string($3.tipo)
+            );
+        }
         if ($1.es_comptime && $3.es_comptime) {
             $$.es_comptime = true;
             if ($$.tipo == TIPO_INTEGER) {
@@ -759,6 +881,15 @@ termino:
         polaca_emitir_operador("/", yylineno);
         $$.simbolo_ref = NULL;
         $$.tipo = ($1.tipo == TIPO_SINGLEF || $3.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if ($1.tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && $1.tipo != $3.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string($1.tipo),
+                tipo_dato_a_string($3.tipo)
+            );
+        }
         if ($1.es_comptime && $3.es_comptime) {
             if (($$.tipo == TIPO_INTEGER && $3.val_int == 0) || ($$.tipo == TIPO_SINGLEF && $3.val_float == 0.0)) {
                 registrar_error(ETAPA_SEMANTICO, yylineno, "División por cero en evaluación de expresión COMPTIME.");
@@ -871,15 +1002,61 @@ operando_base:
         $$.es_comptime = false;
         $$.simbolo_ref = s;
         $$.tipo = TIPO_NO_ASIGNADO;
+
+        // Tema 32: Búsqueda de miembro con herencia múltiple (Opción 3)
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                ResultadoBusquedaMiembro res_m;
+                if (resolver_miembro_herencia(obtener_tabla_simbolos(), cls, $3->lexema, yylineno, &res_m)) {
+                    $$.tipo = res_m.tipo;
+                }
+            }
+        }
     }
   | ID '[' expresion_aritmetica ']'
     {
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
+        if (s == NULL) {
+            registrar_error(ETAPA_SEMANTICO, yylineno, "Variable o identificador '%s' no declarado o fuera de alcance.", $1->lexema);
+            s = $1;
+        }
         polaca_emitir_simbolo(s ? s : $1, yylineno);
         polaca_emitir_operador("[]", yylineno);
         $$.es_comptime = false;
         $$.simbolo_ref = s;
         $$.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
+
+        // Tema 29: Acceso posicional a atributos de clase en expresiones
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                if ($3.tipo != TIPO_INTEGER && $3.tipo != TIPO_NO_ASIGNADO) {
+                    registrar_error(ETAPA_SEMANTICO, yylineno, "El índice de acceso posicional del objeto '%s' debe ser INTEGER.", $1->lexema);
+                } else if ($3.es_comptime) {
+                    long idx = $3.val_int;
+                    if (idx < 0 || idx >= cls->cant_atributos) {
+                        registrar_error(
+                            ETAPA_SEMANTICO,
+                            yylineno,
+                            "Índice de atributo %ld fuera de rango [0..%d] en objeto '%s' (clase '%s').",
+                            idx,
+                            cls->cant_atributos > 0 ? cls->cant_atributos - 1 : 0,
+                            s->nombre_original ? s->nombre_original : s->lexema,
+                            s->tipo_clase
+                        );
+                    } else {
+                        AtributoClase *at = cls->atributos;
+                        for (long a = 0; a < idx && at != NULL; a++) {
+                            at = at->siguiente;
+                        }
+                        if (at != NULL) {
+                            $$.tipo = at->tipo;
+                        }
+                    }
+                }
+            }
+        }
     }
   | llamada_con_orden
     {
@@ -952,6 +1129,16 @@ llamada_metodo_con_orden:
 llamada_metodo_encabezado:
     ID '.' ID '('
     {
+        Simbolo *obj = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
+        if (!obj || obj->uso != USO_OBJETO) {
+            registrar_error(ETAPA_SEMANTICO, yylineno, "El identificador '%s' no es un objeto válido.", $1->lexema);
+        } else if (obj->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), obj->tipo_clase);
+            if (cls) {
+                ResultadoBusquedaMiembro res_m;
+                resolver_miembro_herencia(obtener_tabla_simbolos(), cls, $3->lexema, yylineno, &res_m);
+            }
+        }
         iniciar_invocacion($3->lexema, yylineno);
     }
 ;
@@ -1240,6 +1427,15 @@ bloque_o_sentencia:
 condicion:
     expresion_aritmetica operador_relacional expresion_aritmetica
     {
+        if ($1.tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && $1.tipo != $3.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en condición relacional: no se puede comparar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string($1.tipo),
+                tipo_dato_a_string($3.tipo)
+            );
+        }
         polaca_emitir_operador($2, yylineno);
     }
 ;

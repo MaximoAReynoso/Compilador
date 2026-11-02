@@ -367,3 +367,114 @@ bool clases_tienen_misma_estructura(Simbolo *c1, Simbolo *c2) {
     }
     return true;
 }
+
+static bool buscar_miembro_en_clase_directa(TablaSimbolos *ts, Simbolo *cls, const char *nombre, ResultadoBusquedaMiembro *res) {
+    if (!cls || !nombre) return false;
+
+    // 1. Buscar en atributos de la clase
+    for (AtributoClase *at = cls->atributos; at != NULL; at = at->siguiente) {
+        if (strcmp(at->nombre, nombre) == 0) {
+            if (res) {
+                res->nombre_clase_origen = cls->nombre_original ? cls->nombre_original : cls->lexema;
+                res->tipo = at->tipo;
+                res->uso = USO_VARIABLE;
+                res->simbolo_metodo = NULL;
+            }
+            return true;
+        }
+    }
+
+    // 2. Buscar en métodos de la clase
+    char ambito_clase[256];
+    snprintf(ambito_clase, sizeof(ambito_clase), "%s:%s",
+             cls->ambito ? cls->ambito : "main",
+             cls->nombre_original ? cls->nombre_original : cls->lexema);
+    char *mangled_metodo = construir_mangled_name(nombre, ambito_clase);
+    Simbolo *metodo = buscar_simbolo(ts, mangled_metodo);
+    free(mangled_metodo);
+
+    if (metodo != NULL && metodo->uso == USO_FUNCION) {
+        if (res) {
+            res->nombre_clase_origen = cls->nombre_original ? cls->nombre_original : cls->lexema;
+            res->tipo = metodo->tipo_retorno;
+            res->uso = USO_FUNCION;
+            res->simbolo_metodo = metodo;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool resolver_miembro_herencia(TablaSimbolos *ts, Simbolo *cls, const char *nombre, int linea, ResultadoBusquedaMiembro *res_final) {
+    if (!cls) return false;
+
+    // Paso 1: Si está en la clase propia, se usa directamente (sin ambigüedad)
+    ResultadoBusquedaMiembro res_propia;
+    if (buscar_miembro_en_clase_directa(ts, cls, nombre, &res_propia)) {
+        if (res_final) *res_final = res_propia;
+        return true;
+    }
+
+    // Paso 2: Si no está en la clase propia, buscar en las clases de las cuales hereda
+    if (cls->cant_padres == 0 || cls->clases_padre == NULL) {
+        registrar_error(
+            ETAPA_SEMANTICO,
+            linea,
+            "El miembro '%s' no está declarado en la clase '%s'.",
+            nombre,
+            cls->nombre_original ? cls->nombre_original : cls->lexema
+        );
+        return false;
+    }
+
+    char *primera_base = NULL;
+    char *segunda_base = NULL;
+    int encontradas = 0;
+    ResultadoBusquedaMiembro res_hallada;
+
+    for (int i = 0; i < cls->cant_padres; i++) {
+        const char *nom_padre = cls->clases_padre[i];
+        Simbolo *padre = buscar_identificador_semantico(ts, nom_padre);
+        if (!padre || padre->uso != USO_CLASE) {
+            continue;
+        }
+
+        ResultadoBusquedaMiembro res_p;
+        if (buscar_miembro_en_clase_directa(ts, padre, nombre, &res_p)) {
+            encontradas++;
+            if (encontradas == 1) {
+                primera_base = padre->nombre_original ? padre->nombre_original : padre->lexema;
+                res_hallada = res_p;
+            } else if (encontradas == 2) {
+                segunda_base = padre->nombre_original ? padre->nombre_original : padre->lexema;
+            }
+        }
+    }
+
+    if (encontradas > 1) {
+        registrar_error(
+            ETAPA_SEMANTICO,
+            linea,
+            "Ambigüedad por herencia múltiple (Tema 32 - Opción 3): el miembro '%s' se encuentra en más de una clase base ('%s' y '%s').",
+            nombre,
+            primera_base ? primera_base : "?",
+            segunda_base ? segunda_base : "?"
+        );
+        return false;
+    }
+
+    if (encontradas == 1) {
+        if (res_final) *res_final = res_hallada;
+        return true;
+    }
+
+    registrar_error(
+        ETAPA_SEMANTICO,
+        linea,
+        "El miembro '%s' no está declarado en la clase '%s' ni en sus clases heredadas.",
+        nombre,
+        cls->nombre_original ? cls->nombre_original : cls->lexema
+    );
+    return false;
+}

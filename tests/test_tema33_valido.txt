@@ -1,0 +1,23 @@
+test_tema33_valido
+
+INTEGER a, b;
+SINGLEF y, z;
+
+BEGIN
+    a := 5$i;
+    b := 10$i;
+    y := 2.5;
+
+    // Asignacion de INTEGER a SINGLEF convertida explicitamente con TOSF
+    z := TOSF(a + b);
+
+    // Operacion mixta valida usando TOSF
+    z := TOSF(a) + y;
+
+    // Comparacion mixta valida usando TOSF
+    IF (z > TOSF(a))
+        POUT("z es mayor");
+    END_IF;
+
+    POUT(z);
+END;

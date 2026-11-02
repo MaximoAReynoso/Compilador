@@ -222,13 +222,17 @@ static void finalizar_invocacion_con_orden(void) {
 
 /* Estado para Tema 24: Clases con código */
 static Simbolo *clase_actual_declaracion = NULL;
+
+/* Estado para Tema 32: Herencia múltiple */
+static char *lista_padres_declarados[16];
+static int cant_padres_declarados = 0;
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
 #endif
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
-#line 205 "src/gramatica.y"
+#line 209 "src/gramatica.y"
 typedef union YYSTYPE {
     struct Simbolo *simbolo;
     int val_int;
@@ -237,7 +241,7 @@ typedef union YYSTYPE {
     InfoExpr info_expr;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 241 "y.tab.c"
+#line 245 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -1063,7 +1067,7 @@ static YYINT  *yylexp = NULL;
 
 static YYINT  *yylexemes = NULL;
 #endif /* YYBTYACC */
-#line 1257 "src/gramatica.y"
+#line 1453 "src/gramatica.y"
 
 void yyerror(const char *s) {
     if (strncmp(s, "syntax error", 12) == 0) {
@@ -1080,7 +1084,7 @@ void yyerror(const char *s) {
     const char *mensaje = (strncmp(s, "Error: ", 7) == 0) ? s + 7 : s;
     registrar_error(ETAPA_SINTACTICO, yylineno, "%s", mensaje);
 }
-#line 1084 "y.tab.c"
+#line 1088 "y.tab.c"
 
 /* For use in generated program */
 #define yydepth (int)(yystack.s_mark - yystack.s_base)
@@ -1751,29 +1755,29 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 230 "src/gramatica.y"
+#line 234 "src/gramatica.y"
 	{
         /* Programa finalizado correctamente*/
     }
-#line 1759 "y.tab.c"
+#line 1763 "y.tab.c"
 break;
 case 2:
-#line 234 "src/gramatica.y"
+#line 238 "src/gramatica.y"
 	{ yyerror("Error: Falta el delimitador ; al final del bloque ejecutable."); yyerrok; }
-#line 1764 "y.tab.c"
+#line 1768 "y.tab.c"
 break;
 case 3:
-#line 236 "src/gramatica.y"
+#line 240 "src/gramatica.y"
 	{ yyerror("Error: Falta el delimitador END al final del bloque ejecutable."); yyerrok; }
-#line 1769 "y.tab.c"
+#line 1773 "y.tab.c"
 break;
 case 4:
-#line 238 "src/gramatica.y"
+#line 242 "src/gramatica.y"
 	{ yyerror("Error: Falta el nombre del programa al inicio."); yyerrok; }
-#line 1774 "y.tab.c"
+#line 1778 "y.tab.c"
 break;
 case 14:
-#line 261 "src/gramatica.y"
+#line 265 "src/gramatica.y"
 	{
         for (int i = 0; i < cant_vars_declaradas; i++) {
             declarar_identificador(
@@ -1787,25 +1791,25 @@ case 14:
         }
         cant_vars_declaradas = 0;
     }
-#line 1791 "y.tab.c"
+#line 1795 "y.tab.c"
 break;
 case 15:
-#line 275 "src/gramatica.y"
+#line 279 "src/gramatica.y"
 	{ yyerror("Error: Falta el tipo de dato en la declaración COMPTIME."); yyerrok; }
-#line 1796 "y.tab.c"
+#line 1800 "y.tab.c"
 break;
 case 16:
-#line 279 "src/gramatica.y"
+#line 283 "src/gramatica.y"
 	{ yyval.tipo_dato = TIPO_INTEGER; }
-#line 1801 "y.tab.c"
+#line 1805 "y.tab.c"
 break;
 case 17:
-#line 280 "src/gramatica.y"
+#line 284 "src/gramatica.y"
 	{ yyval.tipo_dato = TIPO_SINGLEF; }
-#line 1806 "y.tab.c"
+#line 1810 "y.tab.c"
 break;
 case 18:
-#line 285 "src/gramatica.y"
+#line 289 "src/gramatica.y"
 	{
         for (int i = 0; i < cant_vars_declaradas; i++) {
             declarar_identificador(
@@ -1833,29 +1837,29 @@ case 18:
         }
         cant_vars_declaradas = 0;
     }
-#line 1837 "y.tab.c"
+#line 1841 "y.tab.c"
 break;
 case 19:
-#line 316 "src/gramatica.y"
+#line 320 "src/gramatica.y"
 	{
         if (cant_vars_declaradas < 64) {
             lista_vars_declaradas[cant_vars_declaradas++] = yystack.l_mark[0].simbolo;
         }
     }
-#line 1846 "y.tab.c"
+#line 1850 "y.tab.c"
 break;
 case 20:
-#line 322 "src/gramatica.y"
+#line 326 "src/gramatica.y"
 	{
         cant_vars_declaradas = 0;
         if (cant_vars_declaradas < 64) {
             lista_vars_declaradas[cant_vars_declaradas++] = yystack.l_mark[0].simbolo;
         }
     }
-#line 1856 "y.tab.c"
+#line 1860 "y.tab.c"
 break;
 case 21:
-#line 332 "src/gramatica.y"
+#line 336 "src/gramatica.y"
 	{
         for (int i = 0; i < cant_vars_declaradas; i++) {
             Simbolo *obj = declarar_identificador(
@@ -1872,38 +1876,38 @@ case 21:
         }
         cant_vars_declaradas = 0;
     }
-#line 1876 "y.tab.c"
+#line 1880 "y.tab.c"
 break;
 case 22:
-#line 352 "src/gramatica.y"
+#line 356 "src/gramatica.y"
 	{
         if (tope_fn_decl > 0) tope_fn_decl--;
         polaca_desapilar_actual();
         salir_ambito();
     }
-#line 1885 "y.tab.c"
+#line 1889 "y.tab.c"
 break;
 case 23:
-#line 358 "src/gramatica.y"
+#line 362 "src/gramatica.y"
 	{
         if (tope_fn_decl > 0) tope_fn_decl--;
         polaca_desapilar_actual();
         salir_ambito();
     }
-#line 1894 "y.tab.c"
+#line 1898 "y.tab.c"
 break;
 case 24:
-#line 364 "src/gramatica.y"
+#line 368 "src/gramatica.y"
 	{ yyerror("Error: Falta el nombre (identificador) de la función."); yyerrok; }
-#line 1899 "y.tab.c"
+#line 1903 "y.tab.c"
 break;
 case 25:
-#line 366 "src/gramatica.y"
+#line 370 "src/gramatica.y"
 	{ yyerror("Error: Faltan los parametros de la función."); yyerrok; }
-#line 1904 "y.tab.c"
+#line 1908 "y.tab.c"
 break;
 case 26:
-#line 371 "src/gramatica.y"
+#line 375 "src/gramatica.y"
 	{
         Simbolo *fn = declarar_identificador(
             obtener_tabla_simbolos(),
@@ -1922,10 +1926,10 @@ case 26:
         free(mangled);
         polaca_apilar_actual(pf);
     }
-#line 1926 "y.tab.c"
+#line 1930 "y.tab.c"
 break;
 case 27:
-#line 393 "src/gramatica.y"
+#line 397 "src/gramatica.y"
 	{
         Simbolo *fn = declarar_identificador(
             obtener_tabla_simbolos(),
@@ -1944,15 +1948,15 @@ case 27:
         free(mangled);
         polaca_apilar_actual(pf);
     }
-#line 1948 "y.tab.c"
+#line 1952 "y.tab.c"
 break;
 case 29:
-#line 416 "src/gramatica.y"
+#line 420 "src/gramatica.y"
 	{ yyerror("Error: Falta de ',' en declaración de parámetros."); yyerrok; }
-#line 1953 "y.tab.c"
+#line 1957 "y.tab.c"
 break;
 case 31:
-#line 422 "src/gramatica.y"
+#line 426 "src/gramatica.y"
 	{
         declarar_identificador(
             obtener_tabla_simbolos(),
@@ -1978,10 +1982,10 @@ case 31:
             fn->cant_parametros++;
         }
     }
-#line 1982 "y.tab.c"
+#line 1986 "y.tab.c"
 break;
 case 32:
-#line 448 "src/gramatica.y"
+#line 452 "src/gramatica.y"
 	{
         Simbolo *p_sym = declarar_identificador(
             obtener_tabla_simbolos(),
@@ -2011,15 +2015,15 @@ case 32:
             fn->cant_parametros++;
         }
     }
-#line 2015 "y.tab.c"
+#line 2019 "y.tab.c"
 break;
 case 33:
-#line 478 "src/gramatica.y"
+#line 482 "src/gramatica.y"
 	{ yyerror("Error: Falta el nombre del parámetro formal en la función."); yyerrok; }
-#line 2020 "y.tab.c"
+#line 2024 "y.tab.c"
 break;
 case 34:
-#line 482 "src/gramatica.y"
+#line 486 "src/gramatica.y"
 	{
         Simbolo *cls = declarar_identificador(
             obtener_tabla_simbolos(),
@@ -2032,10 +2036,10 @@ case 34:
         clase_actual_declaracion = cls;
         entrar_ambito(yystack.l_mark[0].simbolo->lexema);
     }
-#line 2036 "y.tab.c"
+#line 2040 "y.tab.c"
 break;
 case 35:
-#line 494 "src/gramatica.y"
+#line 498 "src/gramatica.y"
 	{
         if (clase_actual_declaracion && clase_actual_declaracion->codigo_clase) {
             TablaSimbolos *ts = obtener_tabla_simbolos();
@@ -2061,58 +2065,102 @@ case 35:
         clase_actual_declaracion = NULL;
         salir_ambito();
     }
-#line 2065 "y.tab.c"
+#line 2069 "y.tab.c"
 break;
 case 36:
-#line 523 "src/gramatica.y"
+#line 527 "src/gramatica.y"
 	{
         if (clase_actual_declaracion != NULL) {
             clase_actual_declaracion->codigo_clase = strdup(yystack.l_mark[0].simbolo->lexema);
         }
     }
-#line 2074 "y.tab.c"
+#line 2078 "y.tab.c"
 break;
 case 37:
-#line 528 "src/gramatica.y"
+#line 532 "src/gramatica.y"
 	{ yyerror("Error: Ausencia del código en la declaración de la clase."); yyerrok; }
-#line 2079 "y.tab.c"
+#line 2083 "y.tab.c"
+break;
+case 38:
+#line 537 "src/gramatica.y"
+	{
+        if (cant_padres_declarados < 16) {
+            lista_padres_declarados[cant_padres_declarados++] = strdup(yystack.l_mark[0].simbolo->lexema);
+        }
+    }
+#line 2092 "y.tab.c"
+break;
+case 39:
+#line 543 "src/gramatica.y"
+	{
+        cant_padres_declarados = 0;
+        if (cant_padres_declarados < 16) {
+            lista_padres_declarados[cant_padres_declarados++] = strdup(yystack.l_mark[0].simbolo->lexema);
+        }
+    }
+#line 2102 "y.tab.c"
+break;
+case 40:
+#line 553 "src/gramatica.y"
+	{
+        cant_padres_declarados = 0;
+    }
+#line 2109 "y.tab.c"
+break;
+case 41:
+#line 557 "src/gramatica.y"
+	{
+        if (clase_actual_declaracion != NULL && cant_padres_declarados > 0) {
+            clase_actual_declaracion->clases_padre = malloc(cant_padres_declarados * sizeof(char *));
+            clase_actual_declaracion->cant_padres = cant_padres_declarados;
+            for (int p = 0; p < cant_padres_declarados; p++) {
+                clase_actual_declaracion->clases_padre[p] = lista_padres_declarados[p];
+                Simbolo *padre = buscar_identificador_semantico(obtener_tabla_simbolos(), lista_padres_declarados[p]);
+                if (!padre || padre->uso != USO_CLASE) {
+                    registrar_error(ETAPA_SEMANTICO, yylineno, "La clase base '%s' no está declarada o no es una clase válida.", lista_padres_declarados[p]);
+                }
+            }
+        }
+        cant_padres_declarados = 0;
+    }
+#line 2127 "y.tab.c"
 break;
 case 42:
-#line 540 "src/gramatica.y"
+#line 572 "src/gramatica.y"
 	{ yyerror("Error: Ausencia de nombre o lista de clases después de extends."); yyerrok; }
-#line 2084 "y.tab.c"
+#line 2132 "y.tab.c"
 break;
 case 48:
-#line 556 "src/gramatica.y"
+#line 588 "src/gramatica.y"
 	{ yyerror("Error: Falta de delimitador de sentencias ejecutables BEGIN."); yyerrok; }
-#line 2089 "y.tab.c"
+#line 2137 "y.tab.c"
 break;
 case 51:
-#line 563 "src/gramatica.y"
+#line 595 "src/gramatica.y"
 	{ yyerror("Error: Sentencia mal formada. Se omitió hasta el ';'."); yyerrok; }
-#line 2094 "y.tab.c"
+#line 2142 "y.tab.c"
 break;
 case 52:
-#line 565 "src/gramatica.y"
+#line 597 "src/gramatica.y"
 	{ yyerror("Error: Sentencia mal formada. Se omitió hasta el ';'."); yyerrok; }
-#line 2099 "y.tab.c"
+#line 2147 "y.tab.c"
 break;
 case 58:
-#line 578 "src/gramatica.y"
+#line 610 "src/gramatica.y"
 	{
         polaca_emitir_operador("RET", yylineno);
     }
-#line 2106 "y.tab.c"
+#line 2154 "y.tab.c"
 break;
 case 59:
-#line 582 "src/gramatica.y"
+#line 614 "src/gramatica.y"
 	{
         polaca_emitir_operador("RET", yylineno);
     }
-#line 2113 "y.tab.c"
+#line 2161 "y.tab.c"
 break;
 case 60:
-#line 589 "src/gramatica.y"
+#line 621 "src/gramatica.y"
 	{
         Simbolo *dest = yystack.l_mark[-2].simbolo;
         if (dest != NULL) {
@@ -2156,18 +2204,34 @@ case 60:
                     }
                 }
             }
+            /* Tema 33: Compatibilidad de tipos en asignaciones (requiere TOSF de INTEGER a SINGLEF)*/
+            if (dest->tipo != TIPO_NO_ASIGNADO && yystack.l_mark[0].info_expr.tipo != TIPO_NO_ASIGNADO && dest->tipo != TIPO_CLASE && yystack.l_mark[0].info_expr.tipo != TIPO_CLASE) {
+                if (dest->tipo == TIPO_SINGLEF && yystack.l_mark[0].info_expr.tipo == TIPO_INTEGER) {
+                    registrar_error(
+                        ETAPA_SEMANTICO,
+                        yylineno,
+                        "Incompatibilidad de tipos en asignación: no se puede asignar INTEGER a SINGLEF sin conversión explícita TOSF."
+                    );
+                } else if (dest->tipo == TIPO_INTEGER && yystack.l_mark[0].info_expr.tipo == TIPO_SINGLEF) {
+                    registrar_error(
+                        ETAPA_SEMANTICO,
+                        yylineno,
+                        "Incompatibilidad de tipos en asignación: no se puede asignar SINGLEF a INTEGER."
+                    );
+                }
+            }
         }
         polaca_emitir_operador(":=", yylineno);
     }
-#line 2163 "y.tab.c"
+#line 2227 "y.tab.c"
 break;
 case 61:
-#line 636 "src/gramatica.y"
+#line 684 "src/gramatica.y"
 	{ yyerror("Error: Uso del símbolo '=' donde debe usarse ':='."); yyerrok; }
-#line 2168 "y.tab.c"
+#line 2232 "y.tab.c"
 break;
 case 62:
-#line 641 "src/gramatica.y"
+#line 689 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[0].simbolo->lexema);
         if (s == NULL) {
@@ -2177,10 +2241,10 @@ case 62:
         polaca_emitir_simbolo(s, yylineno);
         yyval.simbolo = s;
     }
-#line 2181 "y.tab.c"
+#line 2245 "y.tab.c"
 break;
 case 63:
-#line 651 "src/gramatica.y"
+#line 699 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-2].simbolo->lexema);
         if (s == NULL) {
@@ -2190,12 +2254,25 @@ case 63:
         polaca_emitir_simbolo(s, yylineno);
         polaca_emitir_operador(yystack.l_mark[0].simbolo->lexema, yylineno);
         polaca_emitir_operador(".", yylineno);
-        yyval.simbolo = s;
+
+        Simbolo *res_sym = s;
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                ResultadoBusquedaMiembro res_m;
+                if (resolver_miembro_herencia(obtener_tabla_simbolos(), cls, yystack.l_mark[0].simbolo->lexema, yylineno, &res_m)) {
+                    res_sym = calloc(1, sizeof(Simbolo));
+                    *res_sym = *s;
+                    res_sym->tipo = res_m.tipo;
+                }
+            }
+        }
+        yyval.simbolo = res_sym;
     }
-#line 2196 "y.tab.c"
+#line 2273 "y.tab.c"
 break;
 case 64:
-#line 663 "src/gramatica.y"
+#line 724 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-3].simbolo->lexema);
         if (s == NULL) {
@@ -2204,41 +2281,84 @@ case 64:
         }
         polaca_emitir_simbolo(s, yylineno);
         polaca_emitir_operador("[]", yylineno);
-        yyval.simbolo = s;
+
+        Simbolo *res_sym = s;
+        /* Tema 29: Acceso posicional a atributos de objeto en lado izquierdo*/
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                if (yystack.l_mark[-1].info_expr.tipo != TIPO_INTEGER && yystack.l_mark[-1].info_expr.tipo != TIPO_NO_ASIGNADO) {
+                    registrar_error(ETAPA_SEMANTICO, yylineno, "El índice de acceso posicional del objeto '%s' debe ser INTEGER.", yystack.l_mark[-3].simbolo->lexema);
+                } else if (yystack.l_mark[-1].info_expr.es_comptime) {
+                    long idx = yystack.l_mark[-1].info_expr.val_int;
+                    if (idx < 0 || idx >= cls->cant_atributos) {
+                        registrar_error(
+                            ETAPA_SEMANTICO,
+                            yylineno,
+                            "Índice de atributo %ld fuera de rango [0..%d] en objeto '%s' (clase '%s').",
+                            idx,
+                            cls->cant_atributos > 0 ? cls->cant_atributos - 1 : 0,
+                            s->nombre_original ? s->nombre_original : s->lexema,
+                            s->tipo_clase
+                        );
+                    } else {
+                        AtributoClase *at = cls->atributos;
+                        for (long a = 0; a < idx && at != NULL; a++) {
+                            at = at->siguiente;
+                        }
+                        if (at != NULL) {
+                            res_sym = calloc(1, sizeof(Simbolo));
+                            *res_sym = *s;
+                            res_sym->tipo = at->tipo;
+                        }
+                    }
+                }
+            }
+        }
+        yyval.simbolo = res_sym;
     }
-#line 2210 "y.tab.c"
+#line 2321 "y.tab.c"
 break;
 case 65:
-#line 677 "src/gramatica.y"
+#line 772 "src/gramatica.y"
 	{
         polaca_emitir_operador("POUT", yylineno);
     }
-#line 2217 "y.tab.c"
+#line 2328 "y.tab.c"
 break;
 case 66:
-#line 681 "src/gramatica.y"
+#line 776 "src/gramatica.y"
 	{
         polaca_emitir_simbolo(yystack.l_mark[-1].simbolo, yylineno);
         polaca_emitir_operador("POUT", yylineno);
     }
-#line 2225 "y.tab.c"
+#line 2336 "y.tab.c"
 break;
 case 67:
-#line 686 "src/gramatica.y"
+#line 781 "src/gramatica.y"
 	{ yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
-#line 2230 "y.tab.c"
+#line 2341 "y.tab.c"
 break;
 case 68:
-#line 688 "src/gramatica.y"
+#line 783 "src/gramatica.y"
 	{ yyerror("Error: Falta argumento en sentencia pout."); yyerrok; }
-#line 2235 "y.tab.c"
+#line 2346 "y.tab.c"
 break;
 case 69:
-#line 693 "src/gramatica.y"
+#line 788 "src/gramatica.y"
 	{
         polaca_emitir_operador("+", yylineno);
         yyval.info_expr.simbolo_ref = NULL;
         yyval.info_expr.tipo = (yystack.l_mark[-2].info_expr.tipo == TIPO_SINGLEF || yystack.l_mark[0].info_expr.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if (yystack.l_mark[-2].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[0].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[-2].info_expr.tipo != yystack.l_mark[0].info_expr.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string(yystack.l_mark[-2].info_expr.tipo),
+                tipo_dato_a_string(yystack.l_mark[0].info_expr.tipo)
+            );
+        }
         if (yystack.l_mark[-2].info_expr.es_comptime && yystack.l_mark[0].info_expr.es_comptime) {
             yyval.info_expr.es_comptime = true;
             if (yyval.info_expr.tipo == TIPO_INTEGER) {
@@ -2252,14 +2372,23 @@ case 69:
             yyval.info_expr.es_comptime = false;
         }
     }
-#line 2256 "y.tab.c"
+#line 2376 "y.tab.c"
 break;
 case 70:
-#line 711 "src/gramatica.y"
+#line 815 "src/gramatica.y"
 	{
         polaca_emitir_operador("-", yylineno);
         yyval.info_expr.simbolo_ref = NULL;
         yyval.info_expr.tipo = (yystack.l_mark[-2].info_expr.tipo == TIPO_SINGLEF || yystack.l_mark[0].info_expr.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if (yystack.l_mark[-2].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[0].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[-2].info_expr.tipo != yystack.l_mark[0].info_expr.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string(yystack.l_mark[-2].info_expr.tipo),
+                tipo_dato_a_string(yystack.l_mark[0].info_expr.tipo)
+            );
+        }
         if (yystack.l_mark[-2].info_expr.es_comptime && yystack.l_mark[0].info_expr.es_comptime) {
             yyval.info_expr.es_comptime = true;
             if (yyval.info_expr.tipo == TIPO_INTEGER) {
@@ -2273,31 +2402,40 @@ case 70:
             yyval.info_expr.es_comptime = false;
         }
     }
-#line 2277 "y.tab.c"
+#line 2406 "y.tab.c"
 break;
 case 71:
-#line 729 "src/gramatica.y"
+#line 842 "src/gramatica.y"
 	{ yyerror("Error: Falta operando en la expresión después de '+'."); yyerrok; yyval.info_expr.es_comptime = false; }
-#line 2282 "y.tab.c"
+#line 2411 "y.tab.c"
 break;
 case 72:
-#line 731 "src/gramatica.y"
+#line 844 "src/gramatica.y"
 	{ yyerror("Error: Falta operando en la expresión después de '-'."); yyerrok; yyval.info_expr.es_comptime = false; }
-#line 2287 "y.tab.c"
+#line 2416 "y.tab.c"
 break;
 case 73:
-#line 733 "src/gramatica.y"
+#line 846 "src/gramatica.y"
 	{
         yyval.info_expr = yystack.l_mark[0].info_expr;
     }
-#line 2294 "y.tab.c"
+#line 2423 "y.tab.c"
 break;
 case 74:
-#line 740 "src/gramatica.y"
+#line 853 "src/gramatica.y"
 	{
         polaca_emitir_operador("*", yylineno);
         yyval.info_expr.simbolo_ref = NULL;
         yyval.info_expr.tipo = (yystack.l_mark[-2].info_expr.tipo == TIPO_SINGLEF || yystack.l_mark[0].info_expr.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if (yystack.l_mark[-2].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[0].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[-2].info_expr.tipo != yystack.l_mark[0].info_expr.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string(yystack.l_mark[-2].info_expr.tipo),
+                tipo_dato_a_string(yystack.l_mark[0].info_expr.tipo)
+            );
+        }
         if (yystack.l_mark[-2].info_expr.es_comptime && yystack.l_mark[0].info_expr.es_comptime) {
             yyval.info_expr.es_comptime = true;
             if (yyval.info_expr.tipo == TIPO_INTEGER) {
@@ -2311,14 +2449,23 @@ case 74:
             yyval.info_expr.es_comptime = false;
         }
     }
-#line 2315 "y.tab.c"
+#line 2453 "y.tab.c"
 break;
 case 75:
-#line 758 "src/gramatica.y"
+#line 880 "src/gramatica.y"
 	{
         polaca_emitir_operador("/", yylineno);
         yyval.info_expr.simbolo_ref = NULL;
         yyval.info_expr.tipo = (yystack.l_mark[-2].info_expr.tipo == TIPO_SINGLEF || yystack.l_mark[0].info_expr.tipo == TIPO_SINGLEF) ? TIPO_SINGLEF : TIPO_INTEGER;
+        if (yystack.l_mark[-2].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[0].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[-2].info_expr.tipo != yystack.l_mark[0].info_expr.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en operación aritmética: no se puede operar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string(yystack.l_mark[-2].info_expr.tipo),
+                tipo_dato_a_string(yystack.l_mark[0].info_expr.tipo)
+            );
+        }
         if (yystack.l_mark[-2].info_expr.es_comptime && yystack.l_mark[0].info_expr.es_comptime) {
             if ((yyval.info_expr.tipo == TIPO_INTEGER && yystack.l_mark[0].info_expr.val_int == 0) || (yyval.info_expr.tipo == TIPO_SINGLEF && yystack.l_mark[0].info_expr.val_float == 0.0)) {
                 registrar_error(ETAPA_SEMANTICO, yylineno, "División por cero en evaluación de expresión COMPTIME.");
@@ -2337,62 +2484,62 @@ case 75:
             yyval.info_expr.es_comptime = false;
         }
     }
-#line 2341 "y.tab.c"
+#line 2488 "y.tab.c"
 break;
 case 76:
-#line 781 "src/gramatica.y"
+#line 912 "src/gramatica.y"
 	{ yyerror("Error: Falta operando en la expresión después de '*'."); yyerrok; yyval.info_expr.es_comptime = false; }
-#line 2346 "y.tab.c"
+#line 2493 "y.tab.c"
 break;
 case 77:
-#line 783 "src/gramatica.y"
+#line 914 "src/gramatica.y"
 	{ yyerror("Error: Falta operando en la expresión después de '/'."); yyerrok; yyval.info_expr.es_comptime = false; }
-#line 2351 "y.tab.c"
+#line 2498 "y.tab.c"
 break;
 case 78:
-#line 785 "src/gramatica.y"
+#line 916 "src/gramatica.y"
 	{
         yyval.info_expr = yystack.l_mark[0].info_expr;
     }
-#line 2358 "y.tab.c"
+#line 2505 "y.tab.c"
 break;
 case 79:
-#line 792 "src/gramatica.y"
+#line 923 "src/gramatica.y"
 	{
         polaca_emitir_operador("+", yylineno);
     }
-#line 2365 "y.tab.c"
+#line 2512 "y.tab.c"
 break;
 case 80:
-#line 796 "src/gramatica.y"
+#line 927 "src/gramatica.y"
 	{
         polaca_emitir_operador("-", yylineno);
     }
-#line 2372 "y.tab.c"
+#line 2519 "y.tab.c"
 break;
 case 82:
-#line 804 "src/gramatica.y"
+#line 935 "src/gramatica.y"
 	{
         polaca_emitir_operador("*", yylineno);
     }
-#line 2379 "y.tab.c"
+#line 2526 "y.tab.c"
 break;
 case 83:
-#line 808 "src/gramatica.y"
+#line 939 "src/gramatica.y"
 	{
         polaca_emitir_operador("/", yylineno);
     }
-#line 2386 "y.tab.c"
+#line 2533 "y.tab.c"
 break;
 case 85:
-#line 816 "src/gramatica.y"
+#line 947 "src/gramatica.y"
 	{
         yyval.info_expr = yystack.l_mark[0].info_expr;
     }
-#line 2393 "y.tab.c"
+#line 2540 "y.tab.c"
 break;
 case 86:
-#line 819 "src/gramatica.y"
+#line 950 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-1].simbolo->lexema);
         if (s == NULL) {
@@ -2401,10 +2548,10 @@ case 86:
         }
         polaca_emitir_simbolo(s, yylineno);
     }
-#line 2405 "y.tab.c"
+#line 2552 "y.tab.c"
 break;
 case 87:
-#line 827 "src/gramatica.y"
+#line 958 "src/gramatica.y"
 	{
         polaca_emitir_operador(":=", yylineno);
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-5].simbolo->lexema);
@@ -2413,10 +2560,10 @@ case 87:
         yyval.info_expr.simbolo_ref = s;
         yyval.info_expr.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
     }
-#line 2417 "y.tab.c"
+#line 2564 "y.tab.c"
 break;
 case 88:
-#line 839 "src/gramatica.y"
+#line 970 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[0].simbolo->lexema);
         if (s == NULL) {
@@ -2439,10 +2586,10 @@ case 88:
         }
         polaca_emitir_simbolo(s, yylineno);
     }
-#line 2443 "y.tab.c"
+#line 2590 "y.tab.c"
 break;
 case 89:
-#line 862 "src/gramatica.y"
+#line 993 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-2].simbolo->lexema);
         if (s == NULL) {
@@ -2455,41 +2602,87 @@ case 89:
         yyval.info_expr.es_comptime = false;
         yyval.info_expr.simbolo_ref = s;
         yyval.info_expr.tipo = TIPO_NO_ASIGNADO;
+
+        /* Tema 32: Búsqueda de miembro con herencia múltiple (Opción 3)*/
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                ResultadoBusquedaMiembro res_m;
+                if (resolver_miembro_herencia(obtener_tabla_simbolos(), cls, yystack.l_mark[0].simbolo->lexema, yylineno, &res_m)) {
+                    yyval.info_expr.tipo = res_m.tipo;
+                }
+            }
+        }
     }
-#line 2460 "y.tab.c"
+#line 2618 "y.tab.c"
 break;
 case 90:
-#line 876 "src/gramatica.y"
+#line 1018 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-3].simbolo->lexema);
+        if (s == NULL) {
+            registrar_error(ETAPA_SEMANTICO, yylineno, "Variable o identificador '%s' no declarado o fuera de alcance.", yystack.l_mark[-3].simbolo->lexema);
+            s = yystack.l_mark[-3].simbolo;
+        }
         polaca_emitir_simbolo(s ? s : yystack.l_mark[-3].simbolo, yylineno);
         polaca_emitir_operador("[]", yylineno);
         yyval.info_expr.es_comptime = false;
         yyval.info_expr.simbolo_ref = s;
         yyval.info_expr.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
+
+        /* Tema 29: Acceso posicional a atributos de clase en expresiones*/
+        if (s && s->uso == USO_OBJETO && s->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
+            if (cls) {
+                if (yystack.l_mark[-1].info_expr.tipo != TIPO_INTEGER && yystack.l_mark[-1].info_expr.tipo != TIPO_NO_ASIGNADO) {
+                    registrar_error(ETAPA_SEMANTICO, yylineno, "El índice de acceso posicional del objeto '%s' debe ser INTEGER.", yystack.l_mark[-3].simbolo->lexema);
+                } else if (yystack.l_mark[-1].info_expr.es_comptime) {
+                    long idx = yystack.l_mark[-1].info_expr.val_int;
+                    if (idx < 0 || idx >= cls->cant_atributos) {
+                        registrar_error(
+                            ETAPA_SEMANTICO,
+                            yylineno,
+                            "Índice de atributo %ld fuera de rango [0..%d] en objeto '%s' (clase '%s').",
+                            idx,
+                            cls->cant_atributos > 0 ? cls->cant_atributos - 1 : 0,
+                            s->nombre_original ? s->nombre_original : s->lexema,
+                            s->tipo_clase
+                        );
+                    } else {
+                        AtributoClase *at = cls->atributos;
+                        for (long a = 0; a < idx && at != NULL; a++) {
+                            at = at->siguiente;
+                        }
+                        if (at != NULL) {
+                            yyval.info_expr.tipo = at->tipo;
+                        }
+                    }
+                }
+            }
+        }
     }
-#line 2472 "y.tab.c"
+#line 2665 "y.tab.c"
 break;
 case 91:
-#line 885 "src/gramatica.y"
+#line 1062 "src/gramatica.y"
 	{
         yyval.info_expr.es_comptime = false;
         yyval.info_expr.simbolo_ref = NULL;
         yyval.info_expr.tipo = TIPO_NO_ASIGNADO;
     }
-#line 2481 "y.tab.c"
+#line 2674 "y.tab.c"
 break;
 case 92:
-#line 891 "src/gramatica.y"
+#line 1068 "src/gramatica.y"
 	{
         yyval.info_expr.es_comptime = false;
         yyval.info_expr.simbolo_ref = NULL;
         yyval.info_expr.tipo = TIPO_NO_ASIGNADO;
     }
-#line 2490 "y.tab.c"
+#line 2683 "y.tab.c"
 break;
 case 93:
-#line 897 "src/gramatica.y"
+#line 1074 "src/gramatica.y"
 	{
         polaca_emitir_operador("TOSF", yylineno);
         yyval.info_expr.es_comptime = yystack.l_mark[-1].info_expr.es_comptime;
@@ -2498,10 +2691,10 @@ case 93:
         yyval.info_expr.val_int = (long)yyval.info_expr.val_float;
         yyval.info_expr.simbolo_ref = NULL;
     }
-#line 2502 "y.tab.c"
+#line 2695 "y.tab.c"
 break;
 case 94:
-#line 906 "src/gramatica.y"
+#line 1083 "src/gramatica.y"
 	{
         if (yystack.l_mark[0].simbolo != NULL) {
             polaca_emitir_simbolo(yystack.l_mark[0].simbolo, yylineno);
@@ -2521,69 +2714,79 @@ case 94:
             yyval.info_expr.tipo = TIPO_NO_ASIGNADO;
         }
     }
-#line 2525 "y.tab.c"
+#line 2718 "y.tab.c"
 break;
 case 95:
-#line 929 "src/gramatica.y"
+#line 1106 "src/gramatica.y"
 	{
         finalizar_invocacion_con_orden();
     }
-#line 2532 "y.tab.c"
+#line 2725 "y.tab.c"
 break;
 case 96:
-#line 933 "src/gramatica.y"
+#line 1110 "src/gramatica.y"
 	{ yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
-#line 2537 "y.tab.c"
+#line 2730 "y.tab.c"
 break;
 case 97:
-#line 938 "src/gramatica.y"
+#line 1115 "src/gramatica.y"
 	{
         iniciar_invocacion(yystack.l_mark[-1].simbolo->lexema, yylineno);
     }
-#line 2544 "y.tab.c"
+#line 2737 "y.tab.c"
 break;
 case 98:
-#line 945 "src/gramatica.y"
+#line 1122 "src/gramatica.y"
 	{
         finalizar_invocacion_con_orden();
     }
-#line 2551 "y.tab.c"
+#line 2744 "y.tab.c"
 break;
 case 99:
-#line 949 "src/gramatica.y"
+#line 1126 "src/gramatica.y"
 	{ yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
-#line 2556 "y.tab.c"
+#line 2749 "y.tab.c"
 break;
 case 100:
-#line 954 "src/gramatica.y"
+#line 1131 "src/gramatica.y"
 	{
+        Simbolo *obj = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-3].simbolo->lexema);
+        if (!obj || obj->uso != USO_OBJETO) {
+            registrar_error(ETAPA_SEMANTICO, yylineno, "El identificador '%s' no es un objeto válido.", yystack.l_mark[-3].simbolo->lexema);
+        } else if (obj->tipo_clase) {
+            Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), obj->tipo_clase);
+            if (cls) {
+                ResultadoBusquedaMiembro res_m;
+                resolver_miembro_herencia(obtener_tabla_simbolos(), cls, yystack.l_mark[-1].simbolo->lexema, yylineno, &res_m);
+            }
+        }
         iniciar_invocacion(yystack.l_mark[-1].simbolo->lexema, yylineno);
     }
-#line 2563 "y.tab.c"
+#line 2766 "y.tab.c"
 break;
 case 102:
-#line 962 "src/gramatica.y"
+#line 1149 "src/gramatica.y"
 	{ yyerror("Error: Falta el orden de evaluación de parámetros entre '[' y ']'."); yyerrok; }
-#line 2568 "y.tab.c"
+#line 2771 "y.tab.c"
 break;
 case 103:
-#line 967 "src/gramatica.y"
+#line 1154 "src/gramatica.y"
 	{
         long val = parsear_valor_entero(yystack.l_mark[0].simbolo ? yystack.l_mark[0].simbolo->lexema : "0");
         agregar_orden_invocacion((int)val);
     }
-#line 2576 "y.tab.c"
+#line 2779 "y.tab.c"
 break;
 case 105:
-#line 973 "src/gramatica.y"
+#line 1160 "src/gramatica.y"
 	{
         long val = parsear_valor_entero(yystack.l_mark[0].simbolo ? yystack.l_mark[0].simbolo->lexema : "0");
         agregar_orden_invocacion((int)val);
     }
-#line 2584 "y.tab.c"
+#line 2787 "y.tab.c"
 break;
 case 110:
-#line 991 "src/gramatica.y"
+#line 1178 "src/gramatica.y"
 	{
         if (tope_invocaciones > 0) {
             Invocacion *inv = &pila_invocaciones[tope_invocaciones - 1];
@@ -2596,25 +2799,25 @@ case 110:
             }
         }
     }
-#line 2600 "y.tab.c"
+#line 2803 "y.tab.c"
 break;
 case 111:
-#line 1007 "src/gramatica.y"
+#line 1194 "src/gramatica.y"
 	{
         Polaca *p = crear_polaca("param_tmp");
         polaca_apilar_actual(p);
     }
-#line 2608 "y.tab.c"
+#line 2811 "y.tab.c"
 break;
 case 112:
-#line 1015 "src/gramatica.y"
+#line 1202 "src/gramatica.y"
 	{
         yyval.info_expr = yystack.l_mark[0].info_expr;
     }
-#line 2615 "y.tab.c"
+#line 2818 "y.tab.c"
 break;
 case 113:
-#line 1018 "src/gramatica.y"
+#line 1205 "src/gramatica.y"
 	{
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-1].simbolo->lexema);
         if (s == NULL) {
@@ -2623,10 +2826,10 @@ case 113:
         }
         polaca_emitir_simbolo(s, yylineno);
     }
-#line 2627 "y.tab.c"
+#line 2830 "y.tab.c"
 break;
 case 114:
-#line 1026 "src/gramatica.y"
+#line 1213 "src/gramatica.y"
 	{
         polaca_emitir_operador(":=", yylineno);
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-3].simbolo->lexema);
@@ -2635,123 +2838,123 @@ case 114:
         yyval.info_expr.tipo = yystack.l_mark[0].info_expr.tipo;
         yyval.info_expr.simbolo_ref = s;
     }
-#line 2639 "y.tab.c"
+#line 2842 "y.tab.c"
 break;
 case 115:
-#line 1038 "src/gramatica.y"
+#line 1225 "src/gramatica.y"
 	{ cant_errores++; }
-#line 2644 "y.tab.c"
+#line 2847 "y.tab.c"
 break;
 case 116:
-#line 1040 "src/gramatica.y"
+#line 1227 "src/gramatica.y"
 	{ cant_errores++; }
-#line 2649 "y.tab.c"
+#line 2852 "y.tab.c"
 break;
 case 117:
-#line 1045 "src/gramatica.y"
+#line 1232 "src/gramatica.y"
 	{
         yyval.simbolo = yystack.l_mark[0].simbolo;
     }
-#line 2656 "y.tab.c"
+#line 2859 "y.tab.c"
 break;
 case 118:
-#line 1049 "src/gramatica.y"
+#line 1236 "src/gramatica.y"
 	{
         yyval.simbolo = yystack.l_mark[0].simbolo;
     }
-#line 2663 "y.tab.c"
+#line 2866 "y.tab.c"
 break;
 case 119:
-#line 1053 "src/gramatica.y"
+#line 1240 "src/gramatica.y"
 	{
         yyval.simbolo = yystack.l_mark[0].simbolo;
     }
-#line 2670 "y.tab.c"
+#line 2873 "y.tab.c"
 break;
 case 120:
-#line 1057 "src/gramatica.y"
+#line 1244 "src/gramatica.y"
 	{
         yyval.simbolo = yystack.l_mark[0].simbolo;
     }
-#line 2677 "y.tab.c"
+#line 2880 "y.tab.c"
 break;
 case 121:
-#line 1061 "src/gramatica.y"
+#line 1248 "src/gramatica.y"
 	{
         yyval.simbolo = (yystack.l_mark[0].simbolo != NULL) ? cambiar_signo_constante(yystack.l_mark[0].simbolo, -1) : NULL;
     }
-#line 2684 "y.tab.c"
+#line 2887 "y.tab.c"
 break;
 case 122:
-#line 1065 "src/gramatica.y"
+#line 1252 "src/gramatica.y"
 	{
         yyval.simbolo = (yystack.l_mark[0].simbolo != NULL) ? cambiar_signo_constante(yystack.l_mark[0].simbolo, -1) : NULL;
     }
-#line 2691 "y.tab.c"
+#line 2894 "y.tab.c"
 break;
 case 123:
-#line 1069 "src/gramatica.y"
+#line 1256 "src/gramatica.y"
 	{
         yyval.simbolo = NULL;
     }
-#line 2698 "y.tab.c"
+#line 2901 "y.tab.c"
 break;
 case 124:
-#line 1073 "src/gramatica.y"
+#line 1260 "src/gramatica.y"
 	{
         yyval.simbolo = NULL;
     }
-#line 2705 "y.tab.c"
+#line 2908 "y.tab.c"
 break;
 case 125:
-#line 1077 "src/gramatica.y"
+#line 1264 "src/gramatica.y"
 	{
         yyval.simbolo = NULL;
     }
-#line 2712 "y.tab.c"
+#line 2915 "y.tab.c"
 break;
 case 127:
-#line 1085 "src/gramatica.y"
+#line 1272 "src/gramatica.y"
 	{ yyerror("Error: Estructura IF mal cerrada (posiblemente falta END_IF o el delimitador ';')."); yyerrok; }
-#line 2717 "y.tab.c"
+#line 2920 "y.tab.c"
 break;
 case 128:
-#line 1087 "src/gramatica.y"
+#line 1274 "src/gramatica.y"
 	{ yyerror("Error: Falta '(' en la condición de selección."); yyerrok; }
-#line 2722 "y.tab.c"
+#line 2925 "y.tab.c"
 break;
 case 129:
-#line 1089 "src/gramatica.y"
+#line 1276 "src/gramatica.y"
 	{ yyerror("Error: Falta ')' en la condición de selección."); yyerrok; }
-#line 2727 "y.tab.c"
+#line 2930 "y.tab.c"
 break;
 case 130:
-#line 1094 "src/gramatica.y"
+#line 1281 "src/gramatica.y"
 	{
         int celda_bf = polaca_emitir_celda_vacia(yylineno);
         polaca_emitir_operador("BF", yylineno);
         polaca_apilar_salto(celda_bf);
     }
-#line 2736 "y.tab.c"
+#line 2939 "y.tab.c"
 break;
 case 131:
-#line 1103 "src/gramatica.y"
+#line 1290 "src/gramatica.y"
 	{
         int celda_bi = polaca_desapilar_salto();
         polaca_poner_destino(celda_bi, polaca_posicion_actual());
     }
-#line 2744 "y.tab.c"
+#line 2947 "y.tab.c"
 break;
 case 132:
-#line 1108 "src/gramatica.y"
+#line 1295 "src/gramatica.y"
 	{
         int celda_bf = polaca_desapilar_salto();
         polaca_poner_destino(celda_bf, polaca_posicion_actual());
     }
-#line 2752 "y.tab.c"
+#line 2955 "y.tab.c"
 break;
 case 133:
-#line 1116 "src/gramatica.y"
+#line 1303 "src/gramatica.y"
 	{
         int celda_bi = polaca_emitir_celda_vacia(yylineno);
         polaca_emitir_operador("BI", yylineno);
@@ -2759,10 +2962,10 @@ case 133:
         polaca_poner_destino(celda_bf, polaca_posicion_actual());
         polaca_apilar_salto(celda_bi);
     }
-#line 2763 "y.tab.c"
+#line 2966 "y.tab.c"
 break;
 case 136:
-#line 1132 "src/gramatica.y"
+#line 1319 "src/gramatica.y"
 	{
         if (tope_from > 0) {
             ContextoFrom ctx = pila_from[--tope_from];
@@ -2783,10 +2986,10 @@ case 136:
             polaca_poner_destino(ctx.celda_bf, polaca_posicion_actual());
         }
     }
-#line 2787 "y.tab.c"
+#line 2990 "y.tab.c"
 break;
 case 137:
-#line 1156 "src/gramatica.y"
+#line 1343 "src/gramatica.y"
 	{
         Simbolo *id_sym = buscar_identificador_semantico(obtener_tabla_simbolos(), yystack.l_mark[-6].simbolo->lexema);
         if (!id_sym) {
@@ -2849,71 +3052,80 @@ case 137:
             tope_from++;
         }
     }
-#line 2853 "y.tab.c"
+#line 3056 "y.tab.c"
 break;
 case 139:
-#line 1220 "src/gramatica.y"
+#line 1407 "src/gramatica.y"
 	{ yyerror("Error: Falta identificador (ID) en el encabezado."); yyerrok; }
-#line 2858 "y.tab.c"
+#line 3061 "y.tab.c"
 break;
 case 140:
-#line 1222 "src/gramatica.y"
+#line 1409 "src/gramatica.y"
 	{ yyerror("Error: Falta 'TO' en el encabezado de la iteración."); yyerrok; }
-#line 2863 "y.tab.c"
+#line 3066 "y.tab.c"
 break;
 case 141:
-#line 1224 "src/gramatica.y"
+#line 1411 "src/gramatica.y"
 	{ yyerror("Error: Falta '(' en la condición de la iteración."); yyerrok; }
-#line 2868 "y.tab.c"
+#line 3071 "y.tab.c"
 break;
 case 142:
-#line 1226 "src/gramatica.y"
+#line 1413 "src/gramatica.y"
 	{ yyerror("Error: Falta ')' en la condición de la iteración."); yyerrok; }
-#line 2873 "y.tab.c"
+#line 3076 "y.tab.c"
 break;
 case 143:
-#line 1228 "src/gramatica.y"
+#line 1415 "src/gramatica.y"
 	{ yyerror("Error: Falta CTE en el encabezado."); yyerrok; }
-#line 2878 "y.tab.c"
+#line 3081 "y.tab.c"
 break;
 case 147:
-#line 1242 "src/gramatica.y"
+#line 1429 "src/gramatica.y"
 	{
+        if (yystack.l_mark[-2].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[0].info_expr.tipo != TIPO_NO_ASIGNADO && yystack.l_mark[-2].info_expr.tipo != yystack.l_mark[0].info_expr.tipo) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                yylineno,
+                "Tipos incompatibles en condición relacional: no se puede comparar entre '%s' y '%s' sin conversión explícita TOSF.",
+                tipo_dato_a_string(yystack.l_mark[-2].info_expr.tipo),
+                tipo_dato_a_string(yystack.l_mark[0].info_expr.tipo)
+            );
+        }
         polaca_emitir_operador(yystack.l_mark[-1].cadena, yylineno);
     }
-#line 2885 "y.tab.c"
+#line 3097 "y.tab.c"
 break;
 case 148:
-#line 1248 "src/gramatica.y"
+#line 1444 "src/gramatica.y"
 	{ yyval.cadena = "<"; }
-#line 2890 "y.tab.c"
+#line 3102 "y.tab.c"
 break;
 case 149:
-#line 1249 "src/gramatica.y"
+#line 1445 "src/gramatica.y"
 	{ yyval.cadena = ">"; }
-#line 2895 "y.tab.c"
+#line 3107 "y.tab.c"
 break;
 case 150:
-#line 1250 "src/gramatica.y"
+#line 1446 "src/gramatica.y"
 	{ yyval.cadena = ">="; }
-#line 2900 "y.tab.c"
+#line 3112 "y.tab.c"
 break;
 case 151:
-#line 1251 "src/gramatica.y"
+#line 1447 "src/gramatica.y"
 	{ yyval.cadena = "<="; }
-#line 2905 "y.tab.c"
+#line 3117 "y.tab.c"
 break;
 case 152:
-#line 1252 "src/gramatica.y"
+#line 1448 "src/gramatica.y"
 	{ yyval.cadena = "=="; }
-#line 2910 "y.tab.c"
+#line 3122 "y.tab.c"
 break;
 case 153:
-#line 1253 "src/gramatica.y"
+#line 1449 "src/gramatica.y"
 	{ yyval.cadena = "!="; }
-#line 2915 "y.tab.c"
+#line 3127 "y.tab.c"
 break;
-#line 2917 "y.tab.c"
+#line 3129 "y.tab.c"
     default:
         break;
     }

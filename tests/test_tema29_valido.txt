@@ -1,0 +1,22 @@
+test_tema29_valido
+
+CLASS mi_clase codigo_clase
+BEGIN
+    INTEGER attr_entero;
+    SINGLEF attr_real;
+END;
+
+mi_clase obj;
+INTEGER val_ent;
+SINGLEF val_real;
+
+BEGIN
+    obj[0$i] := 42$i;
+    obj[1$i] := 3.14;
+
+    val_ent := obj[0$i];
+    val_real := obj[1$i];
+
+    POUT(val_ent);
+    POUT(val_real);
+END;

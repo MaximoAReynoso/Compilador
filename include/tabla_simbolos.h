@@ -131,4 +131,15 @@ Simbolo *declarar_identificador(
 /* Chequeo de compatibilidad estructural entre clases (Tema 24) */
 bool clases_tienen_misma_estructura(Simbolo *c1, Simbolo *c2);
 
+/* Resultado de búsqueda de miembros en jerarquía de herencia (Tema 32) */
+typedef struct {
+    char *nombre_clase_origen;
+    TipoDato tipo;
+    UsoSimbolo uso;
+    Simbolo *simbolo_metodo;
+} ResultadoBusquedaMiembro;
+
+/* Desambiguación de miembros en herencia múltiple (Tema 32 - Opción 3) */
+bool resolver_miembro_herencia(TablaSimbolos *ts, Simbolo *cls, const char *nombre, int linea, ResultadoBusquedaMiembro *res_final);
+
 #endif
