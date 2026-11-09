@@ -1,0 +1,8 @@
+test_div_zero_float
+SINGLEF x, y, z;
+BEGIN
+    x := 10.5;
+    y := 0.0;
+    z := x / y;
+    pout(z);
+END;

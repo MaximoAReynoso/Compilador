@@ -1,0 +1,14 @@
+test_tema17_valido
+INTEGER a, b, c;
+
+BEGIN
+    // Asignacion en expresion simple
+    a := b = (4$i);
+    POUT(a);
+    POUT(b);
+
+    // Asignacion en expresion combinada con suma
+    c := b = (10$i) + 5$i;
+    POUT(c);
+    POUT(b);
+END;

@@ -1,0 +1,8 @@
+test_div_zero_int
+INTEGER a, b, c;
+BEGIN
+    a := 10$i;
+    b := 0$i;
+    c := a / b;
+    pout(c);
+END;

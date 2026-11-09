@@ -189,9 +189,7 @@ const char *uso_simbolo_a_string(UsoSimbolo uso) {
     }
 }
 
-/* =========================================================================
- * GESTIÓN DE ÁMBITOS (Scope Stack) y NAME MANGLING
- * ========================================================================= */
+/* Ámbitos y name mangling */
 
 static void actualizar_buffer_ambito(void) {
     buffer_ambito_actual[0] = '\0';
@@ -206,7 +204,7 @@ static void actualizar_buffer_ambito(void) {
 void inicializar_gestor_ambitos(void) {
     destruir_gestor_ambitos();
     tope_ambitos = 0;
-    // El ámbito inicial raíz es "main"
+    /* Ámbito inicial raíz */
     pila_ambitos[tope_ambitos++] = strdup("main");
     actualizar_buffer_ambito();
 }
@@ -265,7 +263,6 @@ Simbolo *buscar_en_ambito_actual(TablaSimbolos *tabla, const char *nombre) {
 Simbolo *buscar_identificador_semantico(TablaSimbolos *tabla, const char *nombre) {
     if (!tabla || !nombre) return NULL;
 
-    // Construcción de la cadena de ámbito para cada nivel desde el tope hacia la raíz
     char scope_temp[512];
     for (int nivel = tope_ambitos; nivel >= 1; nivel--) {
         scope_temp[0] = '\0';
@@ -281,7 +278,6 @@ Simbolo *buscar_identificador_semantico(TablaSimbolos *tabla, const char *nombre
         }
     }
 
-    // Por último, si no se encontró con mangling, buscar el identificador global o directo
     Simbolo *global = buscar_simbolo(tabla, nombre);
     if (global && global->uso != USO_NO_ASIGNADO) {
         return global;
@@ -340,7 +336,6 @@ void imprimir_tabla(TablaSimbolos *tabla) {
     for (int i = 0; i < TAM_TABLA; i++) {
         Simbolo *actual = tabla->entradas[i];
         while (actual != NULL) {
-            // Mostramos todas las entradas con información semántica o constantes
             printf("%-28s %-12d %-10s %-12s %-16s %-10u\n",
                    actual->lexema ? actual->lexema : "?",
                    actual->token,
@@ -371,7 +366,6 @@ bool clases_tienen_misma_estructura(Simbolo *c1, Simbolo *c2) {
 static bool buscar_miembro_en_clase_directa(TablaSimbolos *ts, Simbolo *cls, const char *nombre, ResultadoBusquedaMiembro *res) {
     if (!cls || !nombre) return false;
 
-    // 1. Buscar en atributos de la clase
     for (AtributoClase *at = cls->atributos; at != NULL; at = at->siguiente) {
         if (strcmp(at->nombre, nombre) == 0) {
             if (res) {
@@ -384,7 +378,6 @@ static bool buscar_miembro_en_clase_directa(TablaSimbolos *ts, Simbolo *cls, con
         }
     }
 
-    // 2. Buscar en métodos de la clase
     char ambito_clase[256];
     snprintf(ambito_clase, sizeof(ambito_clase), "%s:%s",
              cls->ambito ? cls->ambito : "main",
@@ -409,14 +402,14 @@ static bool buscar_miembro_en_clase_directa(TablaSimbolos *ts, Simbolo *cls, con
 bool resolver_miembro_herencia(TablaSimbolos *ts, Simbolo *cls, const char *nombre, int linea, ResultadoBusquedaMiembro *res_final) {
     if (!cls) return false;
 
-    // Paso 1: Si está en la clase propia, se usa directamente (sin ambigüedad)
+    /* Búsqueda directa en la clase */
     ResultadoBusquedaMiembro res_propia;
     if (buscar_miembro_en_clase_directa(ts, cls, nombre, &res_propia)) {
         if (res_final) *res_final = res_propia;
         return true;
     }
 
-    // Paso 2: Si no está en la clase propia, buscar en las clases de las cuales hereda
+    /* Búsqueda en clases base */
     if (cls->cant_padres == 0 || cls->clases_padre == NULL) {
         registrar_error(
             ETAPA_SEMANTICO,

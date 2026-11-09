@@ -9,27 +9,21 @@
 #define CANT_ESTADOS 16  //rangos de la matriz de transicion y acciones semanticas
 #define CANT_INPUTS 128
 
-// DECLARACION DE VARIABLES
-
 int yylineno = 1;
 char buffer_lexema[1024] = "";
 int longitud_lexema = 0;
 FILE *archivo_fuente = NULL;
 
-typedef int (*AccionSemantica)(int c, char *buffer, int *len);         // Definicion de tipo para las acciones semanticas
+typedef int (*AccionSemantica)(int c, char *buffer, int *len);
 
-static int matriz_transicion[CANT_ESTADOS][CANT_INPUTS];                // Matriz de transicion de estados
-static AccionSemantica matriz_acciones[CANT_ESTADOS][CANT_INPUTS];      // Matriz de acciones semanticas
-
-
-// FUNCIONES
+static int matriz_transicion[CANT_ESTADOS][CANT_INPUTS];
+static AccionSemantica matriz_acciones[CANT_ESTADOS][CANT_INPUTS];
 
 void set_lexer_file(FILE *f) {
     archivo_fuente = f;
 }
 
 void init_lexer(){
-// Inicializa las matrices
     for(int i = 0; i < CANT_ESTADOS; i++){
         for(int j = 0; j < CANT_INPUTS; j++){
             matriz_transicion[i][j] = -1;
@@ -211,8 +205,7 @@ int yylex(){
         accion = matriz_acciones[estado][c];
         estado = matriz_transicion[estado][c];
 
-        //printf("estado: %d\n", estado);
-        if(estado == -1){ //error
+        if(estado == -1){
             if (estado_anterior == 1 || estado_anterior == 2) {
                 char lexema_invalido[1024];
                 snprintf(lexema_invalido, sizeof(lexema_invalido), "%s", buffer_lexema);
@@ -246,20 +239,20 @@ int yylex(){
                 estado = 0;
                 yylval.simbolo = NULL;
                 return ERROR_LEXICO;
-            } //error
+            }
             printf("Error lexico en linea %d: caracter inesperado '%c' (ascii %d)\n", yylineno,c,c);
             estado = 0;
             longitud_lexema = 0;
             buffer_lexema[0] = '\0';
-        }else if (estado == 15) { //estado Final
-            estado = 0; //proximo token
+        } else if (estado == 15) {
+            estado = 0;
             if (accion != NULL) {
                 int token = accion(c, buffer_lexema, &longitud_lexema);
                 if (token != -1) {
                     return token;
                 }
             }
-        }else {
+        } else {
             if(accion != NULL)
                 accion(c, buffer_lexema, &longitud_lexema);
         }

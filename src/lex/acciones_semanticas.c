@@ -10,6 +10,7 @@
 #include "y.tab.h"
 #include "acciones_semanticas.h"
 #include "tabla_simbolos.h"
+#include "errores.h"
 
 static TablaSimbolos *tabla_actual;
 #define MAX_LONG_ID 22
@@ -129,9 +130,9 @@ int as_emit_token_FLOAT(int c, char *buffer, int *len){
 
     if (errno == ERANGE) {
         if (valor > -FLT_MIN && valor < FLT_MIN) {
-            printf("\nLínea %d: Error: Underflow en constante float '%s' (menor a %e)\n\n", yylineno, buffer, FLT_MIN);
+            registrar_error(ETAPA_LEXICO, yylineno, "Underflow en constante float '%s' (menor a %e)", buffer, FLT_MIN);
         } else {
-            printf("\nLínea %d: Error: Overflow en constante float '%s' (mayor a %e)\n\n",yylineno, buffer, FLT_MAX);
+            registrar_error(ETAPA_LEXICO, yylineno, "Overflow en constante float '%s' (mayor a %e)", buffer, FLT_MAX);
         }
         *len = 0;
         buffer[0] = '\0';
@@ -160,16 +161,15 @@ int as_emit_token_INT(int c, char *buffer, int *len){
 
     if (errno == ERANGE) {// captura del error causado por C
         char *mensaje_error_c = strerror(errno); 
-        printf("\nLínea %d: Error: Fallo en '%s' -> C reporta: \"%s\"\n\n", yylineno, buffer, mensaje_error_c);
+        registrar_error(ETAPA_LEXICO, yylineno, "Fallo en '%s' -> C reporta: \"%s\"", buffer, mensaje_error_c);
         *len = 0;
         buffer[0] = '\0';
         log_lex("[LEX] Token emitido: OUT_OF_RANGE en línea %d\n", yylineno);
         return OUT_OF_RANGE;
     }
 
-    // asumo que todos los valores son positivos
-    if(valor > MAX_INT_CTE){ // c== 32768, asumo que es negativo
-        printf("\nLínea %d: Error: El valor '%ld'excede el rango de 16 bits [%d]\n\n", yylineno, valor,MAX_INT_CTE);
+    if(valor > MAX_INT_CTE){
+        registrar_error(ETAPA_LEXICO, yylineno, "El valor '%ld' excede el rango de 16 bits [%d]", valor, MAX_INT_CTE);
         *len = 0;
         buffer[0] = '\0';
         log_lex("[LEX] Token emitido: OUT_OF_RANGE en línea %d\n", yylineno);
@@ -221,6 +221,7 @@ int as_emit_token_comp(int c, char *buffer, int *len){
         value = GE;
         nombre_tok = "GE (>=)";
     }
+    (void)nombre_tok;
     log_lex("[LEX] Token emitido: %s en línea %d\n", nombre_tok, yylineno);
     *len = 0;
     buffer[0] = '\0';
@@ -250,12 +251,10 @@ int as_emit_token_string(int c, char *buffer, int *len){
 }
 
 bool id_valido(char *buffer) {
-    // Verificar que el primer carácter no sea mayuscula
     if ((buffer[0] >= 'A' && buffer[0] <= 'Z')) {
         return false;
     }
 
-    // Verificar que los caracteres restantes sean letras, dígitos o guiones bajos
     for (int i = 1; buffer[i] != '\0'; i++) {
         if (!((buffer[i] >= 'a' && buffer[i] <= 'z') ||
               (buffer[i] >= '0' && buffer[i] <= '9') ||
@@ -386,13 +385,11 @@ int as_PR_IDENT(int c, char *buffer, int *len){
             buffer[0] = '\0';
             return ID;
         }
-        printf("Error léxico en línea %d: identificador malformado '%s'; debe comenzar con una letra y continuar con letras, dígitos o '_'.\n",
-               yylineno, buffer);
+        registrar_error(ETAPA_LEXICO, yylineno, "Identificador malformado '%s'; debe comenzar con una letra y continuar con letras, dígitos o '_'.", buffer);
         *len = 0;
         buffer[0] = '\0';
         return ERROR_LEXICO;
     }
-    //limpio el buffer
     *len = 0;
     buffer[0] = '\0';
     return ID;

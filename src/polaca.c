@@ -83,6 +83,10 @@ Polaca *obtener_polaca_actual(void) {
     return polaca_actual;
 }
 
+Polaca *obtener_lista_polacas(void) {
+    return lista_polacas;
+}
+
 Polaca *obtener_polaca_por_nombre(const char *nombre) {
     if (!nombre) return NULL;
     for (Polaca *p = lista_polacas; p != NULL; p = p->siguiente) {
@@ -223,7 +227,7 @@ void imprimir_polaca(Polaca *p) {
         switch (e->tipo) {
             case POLACA_TIPO_SIMBOLO:
                 if (e->simbolo) {
-                    // Si es una variable comptime (Tema 22), mostrar su valor numérico resuelto
+                    /* Valor COMPTIME resuelto */
                     if (e->simbolo->uso == USO_VARIABLE_COMPTIME && e->simbolo->valor_comptime_valido) {
                         if (e->simbolo->tipo == TIPO_INTEGER) {
                             printf("%4d:  %ld$i  (comptime: %s)\n", i, e->simbolo->valor_int, e->simbolo->lexema);

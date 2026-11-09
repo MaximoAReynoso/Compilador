@@ -1,0 +1,31 @@
+test_control_anidado
+INTEGER i, j, k;
+INTEGER suma;
+
+BEGIN
+    suma := 0$i;
+
+    // 1. FROM con IF anidado
+    from i = 1$i to 5$i by 1$i repeat
+    begin
+        if (i > 2$i)
+            suma := suma + i;
+        end_if;
+    end;
+    pout(suma);
+
+    // 2. IF con FROM anidado
+    if (suma > 0$i)
+        from j = 1$i to 3$i by 1$i repeat
+            suma := suma + j;
+    end_if;
+    pout(suma);
+
+    // 3. FROM anidado dentro de otro FROM
+    from i = 1$i to 3$i by 1$i repeat
+    begin
+        from k = 1$i to 2$i by 1$i repeat
+            suma := suma + 1$i;
+    end;
+    pout(suma);
+END;

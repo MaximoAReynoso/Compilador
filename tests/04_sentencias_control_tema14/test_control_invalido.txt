@@ -1,0 +1,13 @@
+test_control_invalido
+SINGLEF f;
+INTEGER i;
+
+BEGIN
+    // Error 1: Variable de control f es SINGLEF
+    FROM f = 1$i TO 10$i BY 1$i REPEAT
+        POUT(1$i);
+
+    // Error 2: Constante inicial no es INTEGER
+    FROM i = 2.5 TO 10$i BY 1$i REPEAT
+        POUT(i);
+END;

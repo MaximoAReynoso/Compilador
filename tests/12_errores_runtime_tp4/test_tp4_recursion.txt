@@ -1,0 +1,15 @@
+test_recursion
+INTEGER res;
+
+INTEGER FUNCTION rec(INTEGER n)
+BEGIN
+    IF (n > 1$i)
+        res := rec(n - 1$i)[1$i];
+    END_IF;
+    ret(n);
+END;
+
+BEGIN
+    res := rec(5$i)[1$i];
+    pout(res);
+END;

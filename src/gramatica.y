@@ -12,11 +12,10 @@ extern int yylineno;
 int cant_errores = 0;
 void yyerror(const char *s);
 
-/* Arreglo temporal para acumular variables en declaraciones múltiples */
 static Simbolo *lista_vars_declaradas[64];
 static int cant_vars_declaradas = 0;
 
-/* Contexto para Tema 14 (FROM - REPEAT) */
+/* Contexto FROM - REPEAT */
 typedef struct {
     Simbolo *id_control;
     long cte1_val;
@@ -44,11 +43,10 @@ static long parsear_valor_entero(const char *lexema) {
     return strtol(buf, &endptr, 10);
 }
 
-/* Pila de funciones en declaración para asociar parámetros formales */
 static Simbolo *pila_fn_decl[32];
 static int tope_fn_decl = 0;
 
-/* Estructura para Tema 19: Orden de evaluación obligatorio de parámetros */
+/* Orden de evaluación de parámetros */
 typedef struct {
     Simbolo *fn_simbolo;
     char *nombre_fn;
@@ -118,9 +116,8 @@ static void finalizar_invocacion_con_orden(void) {
         }
     }
 
-    // Copiar los parámetros a los formales en el orden indicado:
     for (int k = 0; k < inv.cant_orden; k++) {
-        int idx = inv.orden[k] - 1; // 1-based a 0-based
+        int idx = inv.orden[k] - 1;
         if (idx < 0 || (fn && idx >= fn->cant_parametros)) {
             registrar_error(
                 ETAPA_SEMANTICO,
@@ -140,7 +137,6 @@ static void finalizar_invocacion_con_orden(void) {
                 pf = pf->siguiente;
             }
             if (pf != NULL) {
-                // Chequeo Tema 22: si el parámetro formal es COMPTIME, el argumento real debe ser comptime
                 if (pf->es_comptime) {
                     if (idx < inv.cant_args && !inv.args_comptime[idx]) {
                         registrar_error(
@@ -163,12 +159,10 @@ static void finalizar_invocacion_con_orden(void) {
             }
         }
 
-        // 1. Emitir destino (parámetro formal)
         if (s_formal != NULL) {
             polaca_emitir_simbolo(s_formal, inv.linea);
         }
 
-        // 2. Emitir valor del parámetro real correspondiente
         if (idx < inv.cant_args && inv.args_polaca[idx] != NULL) {
             Polaca *p_arg = inv.args_polaca[idx];
             for (int e = 0; e < p_arg->tam; e++) {
@@ -183,13 +177,11 @@ static void finalizar_invocacion_con_orden(void) {
             }
         }
 
-        // 3. Emitir asignación :=
         if (s_formal != NULL) {
             polaca_emitir_operador(":=", inv.linea);
         }
     }
 
-    // 4. Emitir llamado CALL
     if (fn != NULL) {
         polaca_emitir_simbolo(fn, inv.linea);
     }
@@ -198,12 +190,55 @@ static void finalizar_invocacion_con_orden(void) {
     if (inv.nombre_fn) free(inv.nombre_fn);
 }
 
-/* Estado para Tema 24: Clases con código */
 static Simbolo *clase_actual_declaracion = NULL;
-
-/* Estado para Tema 32: Herencia múltiple */
 static char *lista_padres_declarados[16];
 static int cant_padres_declarados = 0;
+static int anidamiento_control_no_comptime = 0;
+static bool ultima_condicion_comptime = false;
+static bool pila_condicion_comptime[32];
+static int tope_condicion = 0;
+
+static void validar_compatibilidad_asignacion(Simbolo *dest, TipoDato tipo_expr, bool es_comptime, long val_int, double val_float, int linea) {
+    if (!dest) return;
+
+    if (dest->uso == USO_VARIABLE_COMPTIME) {
+        if (!es_comptime) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                linea,
+                "No se puede asignar una expresión no determinable en tiempo de compilación a la variable COMPTIME '%s'.",
+                dest->nombre_original ? dest->nombre_original : dest->lexema
+            );
+        } else if (anidamiento_control_no_comptime > 0) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                linea,
+                "No se puede modificar la variable COMPTIME '%s' dentro de un contexto de control no determinable en tiempo de compilación.",
+                dest->nombre_original ? dest->nombre_original : dest->lexema
+            );
+        } else {
+            dest->valor_comptime_valido = true;
+            dest->valor_int = val_int;
+            dest->valor_float = val_float;
+        }
+    }
+
+    if (dest->tipo != TIPO_NO_ASIGNADO && tipo_expr != TIPO_NO_ASIGNADO && dest->tipo != TIPO_CLASE && tipo_expr != TIPO_CLASE) {
+        if (dest->tipo == TIPO_SINGLEF && tipo_expr == TIPO_INTEGER) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                linea,
+                "Incompatibilidad de tipos en asignación: no se puede asignar INTEGER a SINGLEF sin conversión explícita TOSF."
+            );
+        } else if (dest->tipo == TIPO_INTEGER && tipo_expr == TIPO_SINGLEF) {
+            registrar_error(
+                ETAPA_SEMANTICO,
+                linea,
+                "Incompatibilidad de tipos en asignación: no se puede asignar SINGLEF a INTEGER."
+            );
+        }
+    }
+}
 %}
 
 %union {
@@ -232,7 +267,6 @@ static int cant_padres_declarados = 0;
 programa:
     ID bloque_declarativo bloque_ejecutable ';'
     {
-        // Programa finalizado correctamente
     }
   | ID bloque_declarativo bloque_ejecutable 
     { yyerror("Error: Falta el delimitador ; al final del bloque ejecutable."); yyerrok; }
@@ -580,6 +614,25 @@ miembros_clase:
 miembro:
     declaracion_variable ';'
   | declaracion_funcion ';'
+  | sentencia_extends ';'
+;
+
+sentencia_extends:
+    EXTENDS lista_clase
+    {
+        if (clase_actual_declaracion != NULL && cant_padres_declarados > 0) {
+            clase_actual_declaracion->clases_padre = malloc(cant_padres_declarados * sizeof(char *));
+            clase_actual_declaracion->cant_padres = cant_padres_declarados;
+            for (int p = 0; p < cant_padres_declarados; p++) {
+                clase_actual_declaracion->clases_padre[p] = lista_padres_declarados[p];
+                Simbolo *padre = buscar_identificador_semantico(obtener_tabla_simbolos(), lista_padres_declarados[p]);
+                if (!padre || padre->uso != USO_CLASE) {
+                    registrar_error(ETAPA_SEMANTICO, yylineno, "La clase base '%s' no está declarada o no es una clase válida.", lista_padres_declarados[p]);
+                }
+            }
+        }
+        cant_padres_declarados = 0;
+    }
 ;
 
 bloque_ejecutable:
@@ -621,23 +674,8 @@ asignacion:
     {
         Simbolo *dest = $1;
         if (dest != NULL) {
-            // Tema 22: Asignación a variable COMPTIME
-            if (dest->uso == USO_VARIABLE_COMPTIME) {
-                if (!$3.es_comptime) {
-                    registrar_error(
-                        ETAPA_SEMANTICO,
-                        yylineno,
-                        "No se puede asignar una expresión no determinable en tiempo de compilación a la variable COMPTIME '%s'.",
-                        dest->nombre_original ? dest->nombre_original : dest->lexema
-                    );
-                } else {
-                    dest->valor_comptime_valido = true;
-                    dest->valor_int = $3.val_int;
-                    dest->valor_float = $3.val_float;
-                }
-            }
+            validar_compatibilidad_asignacion(dest, $3.tipo, $3.es_comptime, $3.val_int, $3.val_float, yylineno);
 
-            // Tema 24: Asignación por estructura en objetos con código
             if (dest->uso == USO_OBJETO) {
                 Simbolo *orig = $3.simbolo_ref;
                 if (orig != NULL && orig->uso == USO_OBJETO) {
@@ -659,22 +697,6 @@ asignacion:
                             }
                         }
                     }
-                }
-            }
-            // Tema 33: Compatibilidad de tipos en asignaciones (requiere TOSF de INTEGER a SINGLEF)
-            if (dest->tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && dest->tipo != TIPO_CLASE && $3.tipo != TIPO_CLASE) {
-                if (dest->tipo == TIPO_SINGLEF && $3.tipo == TIPO_INTEGER) {
-                    registrar_error(
-                        ETAPA_SEMANTICO,
-                        yylineno,
-                        "Incompatibilidad de tipos en asignación: no se puede asignar INTEGER a SINGLEF sin conversión explícita TOSF."
-                    );
-                } else if (dest->tipo == TIPO_INTEGER && $3.tipo == TIPO_SINGLEF) {
-                    registrar_error(
-                        ETAPA_SEMANTICO,
-                        yylineno,
-                        "Incompatibilidad de tipos en asignación: no se puede asignar SINGLEF a INTEGER."
-                    );
                 }
             }
         }
@@ -731,7 +753,6 @@ destino_asignacion:
         polaca_emitir_operador("[]", yylineno);
 
         Simbolo *res_sym = s;
-        // Tema 29: Acceso posicional a atributos de objeto en lado izquierdo
         if (s && s->uso == USO_OBJETO && s->tipo_clase) {
             Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
             if (cls) {
@@ -918,50 +939,27 @@ termino:
     }
 ;
 
-expresion_sin_asignacion:
-    expresion_sin_asignacion '+' termino_sin_asignacion
-    {
-        polaca_emitir_operador("+", yylineno);
-    }
-  | expresion_sin_asignacion '-' termino_sin_asignacion
-    {
-        polaca_emitir_operador("-", yylineno);
-    }
-  | termino_sin_asignacion
-;
-
-termino_sin_asignacion:
-    termino_sin_asignacion '*' operando_base
-    {
-        polaca_emitir_operador("*", yylineno);
-    }
-  | termino_sin_asignacion '/' operando_base
-    {
-        polaca_emitir_operador("/", yylineno);
-    }
-  | operando_base
-;
-
 operando:
     operando_base
     {
         $$ = $1;
     }
-  | ID '=' {
+  | ID '=' '(' {
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         if (s == NULL) {
             registrar_error(ETAPA_SEMANTICO, yylineno, "Variable o identificador '%s' no declarado o fuera de alcance.", $1->lexema);
             s = $1;
         }
         polaca_emitir_simbolo(s, yylineno);
-    } '(' expresion_sin_asignacion ')'
+    } expresion_aritmetica ')'
     {
         polaca_emitir_operador(":=", yylineno);
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         polaca_emitir_simbolo(s ? s : $1, yylineno);
+        validar_compatibilidad_asignacion(s, $5.tipo, $5.es_comptime, $5.val_int, $5.val_float, yylineno);
         $$.es_comptime = false;
         $$.simbolo_ref = s;
-        $$.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
+        $$.tipo = s ? s->tipo : $5.tipo;
     }
 ;
 
@@ -979,15 +977,34 @@ operando_base:
             if (!s->valor_comptime_valido) {
                 registrar_error(ETAPA_SEMANTICO, yylineno, "La variable COMPTIME '%s' se utiliza antes de haber sido inicializada.", $1->lexema);
                 $$.es_comptime = false;
+                polaca_emitir_simbolo(s, yylineno);
             } else {
                 $$.es_comptime = true;
                 $$.val_int = s->valor_int;
                 $$.val_float = s->valor_float;
+                char buf_cte[64];
+                if (s->tipo == TIPO_SINGLEF) {
+                    snprintf(buf_cte, sizeof(buf_cte), "%g", s->valor_float);
+                    Simbolo *c_sym = insertar_simbolo(obtener_tabla_simbolos(), buf_cte, CTE_FLOAT);
+                    if (c_sym) {
+                        c_sym->tipo = TIPO_SINGLEF;
+                        c_sym->uso = USO_CONSTANTE;
+                    }
+                    polaca_emitir_simbolo(c_sym ? c_sym : s, yylineno);
+                } else {
+                    snprintf(buf_cte, sizeof(buf_cte), "%ld$i", s->valor_int);
+                    Simbolo *c_sym = insertar_simbolo(obtener_tabla_simbolos(), buf_cte, CTE);
+                    if (c_sym) {
+                        c_sym->tipo = TIPO_INTEGER;
+                        c_sym->uso = USO_CONSTANTE;
+                    }
+                    polaca_emitir_simbolo(c_sym ? c_sym : s, yylineno);
+                }
             }
         } else {
             $$.es_comptime = false;
+            polaca_emitir_simbolo(s, yylineno);
         }
-        polaca_emitir_simbolo(s, yylineno);
     }
   | ID '.' ID
     {
@@ -1003,7 +1020,6 @@ operando_base:
         $$.simbolo_ref = s;
         $$.tipo = TIPO_NO_ASIGNADO;
 
-        // Tema 32: Búsqueda de miembro con herencia múltiple (Opción 3)
         if (s && s->uso == USO_OBJETO && s->tipo_clase) {
             Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
             if (cls) {
@@ -1027,7 +1043,6 @@ operando_base:
         $$.simbolo_ref = s;
         $$.tipo = s ? s->tipo : TIPO_NO_ASIGNADO;
 
-        // Tema 29: Acceso posicional a atributos de clase en expresiones
         if (s && s->uso == USO_OBJETO && s->tipo_clase) {
             Simbolo *cls = buscar_identificador_semantico(obtener_tabla_simbolos(), s->tipo_clase);
             if (cls) {
@@ -1214,6 +1229,7 @@ parametro_real:
         polaca_emitir_operador(":=", yylineno);
         Simbolo *s = buscar_identificador_semantico(obtener_tabla_simbolos(), $1->lexema);
         polaca_emitir_simbolo(s ? s : $1, yylineno);
+        validar_compatibilidad_asignacion(s, $4.tipo, $4.es_comptime, $4.val_int, $4.val_float, yylineno);
         $$.es_comptime = false;
         $$.tipo = $4.tipo;
         $$.simbolo_ref = s;
@@ -1279,6 +1295,12 @@ if_sentencia:
 if_encabezado:
     IF '(' condicion ')'
     {
+        if (tope_condicion < 32) {
+            pila_condicion_comptime[tope_condicion++] = ultima_condicion_comptime;
+        }
+        if (!ultima_condicion_comptime) {
+            anidamiento_control_no_comptime++;
+        }
         int celda_bf = polaca_emitir_celda_vacia(yylineno);
         polaca_emitir_operador("BF", yylineno);
         polaca_apilar_salto(celda_bf);
@@ -1288,11 +1310,23 @@ if_encabezado:
 fin_if:
     else_encabezado bloque_if END_IF
     {
+        if (tope_condicion > 0) {
+            bool c_comp = pila_condicion_comptime[--tope_condicion];
+            if (!c_comp) {
+                anidamiento_control_no_comptime--;
+            }
+        }
         int celda_bi = polaca_desapilar_salto();
         polaca_poner_destino(celda_bi, polaca_posicion_actual());
     }
   | END_IF
     {
+        if (tope_condicion > 0) {
+            bool c_comp = pila_condicion_comptime[--tope_condicion];
+            if (!c_comp) {
+                anidamiento_control_no_comptime--;
+            }
+        }
         int celda_bf = polaca_desapilar_salto();
         polaca_poner_destino(celda_bf, polaca_posicion_actual());
     }
@@ -1320,26 +1354,28 @@ iteracion:
         if (tope_from > 0) {
             ContextoFrom ctx = pila_from[--tope_from];
 
-            // Actualización de variable de control: id := id +/- cte3
             polaca_emitir_simbolo(ctx.id_control, yylineno);
             polaca_emitir_simbolo(ctx.id_control, yylineno);
             polaca_emitir_simbolo(ctx.cte3_sym, yylineno);
             polaca_emitir_operador(ctx.ascendente ? "+" : "-", yylineno);
             polaca_emitir_operador(":=", yylineno);
 
-            // Salto incondicional al inicio de la prueba
             int celda_bi = polaca_emitir_celda_vacia(yylineno);
             polaca_poner_destino(celda_bi, ctx.pos_inicio_prueba);
             polaca_emitir_operador("BI", yylineno);
 
-            // Backpatching: rellenar el BF con la posición siguiente al BI
             polaca_poner_destino(ctx.celda_bf, polaca_posicion_actual());
         }
     }
 ;
 
+asignador_from:
+    ASSIGN
+  | '='
+;
+
 encabezado_iteracion:
-    FROM ID '=' constante_con_signo TO constante_con_signo BY constante_con_signo
+    FROM ID asignador_from constante_con_signo TO constante_con_signo BY constante_con_signo
     {
         Simbolo *id_sym = buscar_identificador_semantico(obtener_tabla_simbolos(), $2->lexema);
         if (!id_sym) {
@@ -1369,17 +1405,12 @@ encabezado_iteracion:
 
         bool asc = (v1 <= v2);
 
-        // 1. Inicialización en Polaca: id, cte1, :=
         polaca_emitir_simbolo(id_sym, yylineno);
         polaca_emitir_simbolo(c1, yylineno);
         polaca_emitir_operador(":=", yylineno);
 
-        // 2. Inicio de prueba para el ciclo
         int pos_prueba = polaca_posicion_actual();
 
-        // 3. Condición de parada (Pág. 6):
-        // Si CTE1 <= CTE2: id < CTE2
-        // Si CTE1 > CTE2:  id > CTE2
         polaca_emitir_simbolo(id_sym, yylineno);
         polaca_emitir_simbolo(c2, yylineno);
         polaca_emitir_operador(asc ? "<" : ">", yylineno);
@@ -1387,7 +1418,6 @@ encabezado_iteracion:
         int celda_bf = polaca_emitir_celda_vacia(yylineno);
         polaca_emitir_operador("BF", yylineno);
 
-        // 4. Guardar contexto en pila para ciclos anidados
         if (tope_from < 32) {
             pila_from[tope_from].id_control = id_sym;
             pila_from[tope_from].cte1_val = v1;
@@ -1403,15 +1433,15 @@ encabezado_iteracion:
         }
     }
   | FROM '(' condicion ')'
-  | FROM '=' constante_con_signo TO constante_con_signo BY constante_con_signo
+  | FROM asignador_from constante_con_signo TO constante_con_signo BY constante_con_signo
     { yyerror("Error: Falta identificador (ID) en el encabezado."); yyerrok; }
-  | FROM ID '=' constante_con_signo constante_con_signo
+  | FROM ID asignador_from constante_con_signo constante_con_signo
     { yyerror("Error: Falta 'TO' en el encabezado de la iteración."); yyerrok; }
   | FROM condicion ')'
     { yyerror("Error: Falta '(' en la condición de la iteración."); yyerrok; }
   | FROM '(' condicion
     { yyerror("Error: Falta ')' en la condición de la iteración."); yyerrok; }
-  | FROM ID '=' TO
+  | FROM ID asignador_from TO
     { yyerror("Error: Falta CTE en el encabezado."); yyerrok; }
 ;
 
@@ -1427,6 +1457,7 @@ bloque_o_sentencia:
 condicion:
     expresion_aritmetica operador_relacional expresion_aritmetica
     {
+        ultima_condicion_comptime = ($1.es_comptime && $3.es_comptime);
         if ($1.tipo != TIPO_NO_ASIGNADO && $3.tipo != TIPO_NO_ASIGNADO && $1.tipo != $3.tipo) {
             registrar_error(
                 ETAPA_SEMANTICO,

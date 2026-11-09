@@ -1,0 +1,19 @@
+test_alcance_invalido
+INTEGER a;
+
+INTEGER FUNCTION foo(INTEGER p)
+INTEGER var_local;
+BEGIN
+    var_local := 10$i;
+    ret(p + var_local);
+END;
+
+BEGIN
+    a := 5$i;
+    // Error 1: Intento de acceder a la variable local de foo desde el ambito de main
+    a := var_local + 1$i;
+
+    // Error 2: Intento de acceder al parametro p de foo desde el ambito de main
+    a := p + 2$i;
+    pout(a);
+END;
