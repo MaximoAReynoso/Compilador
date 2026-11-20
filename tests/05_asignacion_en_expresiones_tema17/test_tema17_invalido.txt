@@ -1,0 +1,14 @@
+test_tema17_invalido
+INTEGER a, b;
+SINGLEF z;
+
+BEGIN
+    // Error 1: Asignacion de SINGLEF a INTEGER en expresion
+    a := b = (2.5);
+
+    // Error 2: Asignacion a variable no declarada en expresion
+    a := variable_inexistente = (10$i);
+
+    // Error 3: Asignacion de INTEGER a SINGLEF sin TOSF en expresion
+    z := z = (5$i);
+END;

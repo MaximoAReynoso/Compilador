@@ -39,6 +39,9 @@
 typedef union YYSTYPE {
     struct Simbolo *simbolo;
     int val_int;
+    int tipo_dato;
+    const char *cadena;
+    InfoExpr info_expr;
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
 extern YYSTYPE yylval;

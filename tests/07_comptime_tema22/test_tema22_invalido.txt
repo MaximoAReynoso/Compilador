@@ -1,0 +1,16 @@
+test_tema22_err
+COMPTIME INTEGER c1, c2, c_no_init;
+INTEGER x;
+
+INTEGER FUNCTION foo(COMPTIME INTEGER p_comp)
+BEGIN
+    ret(p_comp);
+END;
+
+BEGIN
+    x := 5$i;
+    c1 := x;
+    c2 := c_no_init + 2$i;
+    c1 := 10$i / 0$i;
+    x := foo(x) [1$i];
+END;

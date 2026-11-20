@@ -1,0 +1,21 @@
+test_alcance_valido
+INTEGER global_x, global_y;
+INTEGER resultado;
+
+INTEGER FUNCTION procesar(INTEGER p1, INTEGER p2)
+INTEGER local_var;
+BEGIN
+    local_var := p1 * 2$i;
+    ret(local_var + p2);
+END;
+
+BEGIN
+    global_x := 10$i;
+    global_y := 5$i;
+
+    resultado := procesar(global_x, global_y)[1$i, 2$i];
+    POUT(resultado);
+
+    resultado := procesar(resultado, 3$i)[1$i, 2$i];
+    POUT(resultado);
+END;

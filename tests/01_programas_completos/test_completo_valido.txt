@@ -1,0 +1,64 @@
+prog_completo_valido
+
+CLASS base_figura cod_base
+BEGIN
+    INTEGER id;
+    SINGLEF escala;
+END;
+
+CLASS circulo cod_circulo EXTENDS base_figura
+BEGIN
+    INTEGER radio;
+END;
+
+COMPTIME INTEGER factor_comptime;
+INTEGER contador, acum;
+SINGLEF area_aprox;
+circulo mi_circulo;
+
+INTEGER FUNCTION doblar(INTEGER val)
+INTEGER temporal;
+BEGIN
+    temporal := val * 2$i;
+    ret(temporal);
+END;
+
+BEGIN
+    factor_comptime := 3$i;
+    contador := 0$i;
+    acum := 0$i;
+
+    // Inicializacion de atributos de objeto y herencia
+    mi_circulo.id := 1$i;
+    mi_circulo.radio := 5$i;
+
+    // Acceso posicional a atributo (Tema 29)
+    mi_circulo[0$i] := 10$i;
+
+    // Llamada a funcion con orden (Tema 19)
+    acum := doblar(mi_circulo.radio)[1$i];
+    POUT("Valor doblado:");
+    POUT(acum);
+
+    // Ciclo FROM (Tema 14) con IF anidado
+    FROM contador = 1$i TO 3$i BY 1$i REPEAT
+    BEGIN
+        IF (contador > 1$i)
+            acum := acum + contador;
+        END_IF;
+    END;
+    POUT("Acumulador post FROM:");
+    POUT(acum);
+
+    // Asignacion en expresion (Tema 17)
+    acum := contador = (10$i) + 5$i;
+    POUT("Asignacion en expresion:");
+    POUT(acum);
+
+    // Conversion explicita TOSF (Tema 33)
+    area_aprox := TOSF(acum) * 3.14;
+    POUT("Area aprox TOSF:");
+    POUT(area_aprox);
+
+    POUT("Programa completo ejecutado exitosamente");
+END;

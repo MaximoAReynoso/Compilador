@@ -1,0 +1,24 @@
+test_tema32_invalido
+
+CLASS base_a cod_a
+BEGIN
+    INTEGER miembro_comun;
+END;
+
+CLASS base_b cod_b
+BEGIN
+    INTEGER miembro_comun;
+END;
+
+CLASS derivada cod_der EXTENDS base_a, base_b
+BEGIN
+    INTEGER unico;
+END;
+
+derivada d;
+INTEGER x;
+
+BEGIN
+    // Error semantico: miembro_comun existe en base_a y base_b (Tema 32 - Opcion 3)
+    x := d.miembro_comun;
+END;

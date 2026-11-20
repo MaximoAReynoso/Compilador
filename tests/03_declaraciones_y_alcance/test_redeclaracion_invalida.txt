@@ -1,0 +1,30 @@
+test_redecl
+INTEGER a;
+INTEGER a; // Error: a redeclarada en main
+
+INTEGER FUNCTION f1(INTEGER x)
+INTEGER y;
+INTEGER y; // Error: y redeclarada en f1
+BEGIN
+    ret(x + y);
+END;
+
+INTEGER FUNCTION f1(INTEGER z) // Error: f1 redeclarada en main
+BEGIN
+    ret(z);
+END;
+
+CLASS mi_clase cod1
+BEGIN
+    INTEGER attr;
+END;
+
+CLASS mi_clase cod2 // Error: mi_clase redeclarada en main
+BEGIN
+    INTEGER attr2;
+END;
+
+BEGIN
+    a := 1$i;
+    POUT(a);
+END;

@@ -1,0 +1,22 @@
+test_no_declarado
+INTEGER a;
+
+INTEGER FUNCTION foo(INTEGER x)
+BEGIN
+    // Error 1: var_fantasma no declarada
+    var_fantasma := 10$i;
+    ret(x);
+END;
+
+BEGIN
+    // Error 2: variable b no declarada
+    a := b + 5$i;
+
+    // Error 3: funcion no_existe no declarada
+    a := no_existe(a)[1$i];
+
+    // Error 4: objeto obj_inexistente no declarado
+    obj_inexistente.attr := 20$i;
+
+    POUT(a);
+END;

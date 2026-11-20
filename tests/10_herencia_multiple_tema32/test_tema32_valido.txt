@@ -1,0 +1,28 @@
+test_tema32_valido
+
+CLASS base_a cod_a
+BEGIN
+    INTEGER attr_a;
+END;
+
+CLASS base_b cod_b
+BEGIN
+    INTEGER attr_b;
+END;
+
+CLASS derivada cod_der EXTENDS base_a, base_b
+BEGIN
+    INTEGER attr_propio;
+END;
+
+derivada d;
+INTEGER res;
+
+BEGIN
+    d.attr_a := 10$i;
+    d.attr_b := 20$i;
+    d.attr_propio := 30$i;
+
+    res := d.attr_a + d.attr_b + d.attr_propio;
+    POUT(res);
+END;

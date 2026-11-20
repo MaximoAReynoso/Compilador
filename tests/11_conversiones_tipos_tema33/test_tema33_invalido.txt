@@ -1,0 +1,20 @@
+test_tema33_invalido
+
+INTEGER a;
+SINGLEF z;
+
+BEGIN
+    // Error 1: Asignacion de INTEGER a SINGLEF sin TOSF
+    z := a;
+
+    // Error 2: Asignacion de SINGLEF a INTEGER (no permitida ni con TOSF)
+    a := z;
+
+    // Error 3: Operacion aritmetica mixta sin conversion TOSF
+    z := a + z;
+
+    // Error 4: Comparacion relacional mixta sin conversion TOSF
+    IF (z > a)
+        POUT("error");
+    END_IF;
+END;

@@ -1,0 +1,14 @@
+prog_test
+INTEGER a;
+INTEGER a;
+
+INTEGER FUNCTION foo(INTEGER p)
+BEGIN
+    b := 10$i;
+    ret(p);
+END;
+
+BEGIN
+    a := 5$i;
+    pout(a);
+END;

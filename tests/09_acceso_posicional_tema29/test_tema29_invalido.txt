@@ -1,0 +1,18 @@
+test_tema29_invalido
+
+CLASS mi_clase codigo_clase
+BEGIN
+    INTEGER a;
+    SINGLEF b;
+END;
+
+mi_clase obj;
+INTEGER x;
+
+BEGIN
+    // Error 1: Indice fuera de rango (solo indices 0 y 1 son validos)
+    x := obj[5$i];
+
+    // Error 2: Indice no entero
+    x := obj[1.5];
+END;

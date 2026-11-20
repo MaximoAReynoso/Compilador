@@ -3,3 +3,8 @@ compilador
 .o
 ByaccparaC.zip
 y.output
+final.wat
+node_modules/
+package.json
+package-lock.json
+execute

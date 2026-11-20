@@ -1,0 +1,13 @@
+prog_error_t19
+INTEGER a, b, c;
+
+INTEGER FUNCTION f(INTEGER p1, INTEGER p2, INTEGER p3)
+BEGIN
+    ret(p1 + p2 + p3);
+END;
+
+BEGIN
+    a := 1$i;
+    b := 2$i;
+    c := f(a, b = (4$i), a + b)[1$i, 2$i];
+END;

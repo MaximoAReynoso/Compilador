@@ -1,0 +1,8 @@
+test_overflow_float
+SINGLEF x, y, z;
+BEGIN
+    x := 2.5s38;
+    y := 2.5s38;
+    z := x + y;
+    pout(z);
+END;

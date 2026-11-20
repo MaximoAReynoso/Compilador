@@ -1,4 +1,5 @@
 demo
+INTEGER x ;
 begin
     if 1$i < 2$i) 
         begin
